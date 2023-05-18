@@ -22,10 +22,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     python_executable = "{}/bin/python".format(args.env_path)
     print('python executable = {}'.format(python_executable))
-    python_file = "/allen/programs/braintv/workgroups/nc-ophys/alex.piet/behavior/licking_behavior/scripts/dev.py"
+    python_file = "/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/licking_behavior_NP/scripts/dev.py"
 
     # Define output for logs
-    stdout_basedir = "/allen/programs/braintv/workgroups/nc-ophys/alex.piet/behavior/logs"
+    stdout_basedir = "/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/behavior/logs"
     stdout_location = os.path.join(stdout_basedir, 'job_records_dev_{}'.format(args.version))
     if not os.path.exists(stdout_location):
         print('making folder {}'.format(stdout_location))
