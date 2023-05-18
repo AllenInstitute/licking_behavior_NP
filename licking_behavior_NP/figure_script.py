@@ -1,12 +1,14 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
 import licking_behavior_NP.psy_tools as ps
 import licking_behavior_NP.psy_analysis as pa
 import licking_behavior_NP.psy_general_tools as pgt
 import licking_behavior_NP.psy_visualization as pv
 import licking_behavior_NP.psy_output_tools as po
-import matplotlib.pyplot as plt
 import licking_behavior_NP.build_timing_regressor as b
 import licking_behavior_NP.psy_metrics_tools as pm
-import numpy as np
+
 plt.ion()
 
 BEHAVIOR_VERSION=21

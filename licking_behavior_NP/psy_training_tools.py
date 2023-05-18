@@ -2,11 +2,13 @@ import os
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+
 import licking_behavior_NP.psy_tools as ps
 import licking_behavior_NP.psy_style as pstyle
 import licking_behavior_NP.psy_output_tools as po
 import licking_behavior_NP.psy_general_tools as pgt
-import matplotlib.pyplot as plt
+
 from allensdk.brain_observatory.behavior.behavior_project_cache import \
     VisualBehaviorOphysProjectCache
 plt.ion()

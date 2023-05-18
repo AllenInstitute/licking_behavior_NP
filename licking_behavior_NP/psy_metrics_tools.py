@@ -1,6 +1,6 @@
 import numpy as np
-import licking_behavior_NP.psy_general_tools as pgt
 from scipy.stats import norm
+import licking_behavior_NP.psy_general_tools as pgt
 
 '''
 This is a set of functions for calculating and analyzing model free behavioral 

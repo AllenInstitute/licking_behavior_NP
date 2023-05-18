@@ -3,11 +3,11 @@ import licking_behavior_NP.psy_analysis as pa
 import licking_behavior_NP.psy_output_tools as po
 import licking_behavior_NP.psy_general_tools as pgt
 import licking_behavior_NP.psy_visualization as pv
-import build_timing_regressor as pb
+import licking_behavior_NP.build_timing_regressor as pb
 import matplotlib.pyplot as plt
 plt.ion()
 from importlib import reload
-from alex_utils import *
+from alex_utils.alex_utils import *
 
 
 # Quick start

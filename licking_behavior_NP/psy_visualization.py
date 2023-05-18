@@ -13,7 +13,6 @@ from sklearn.linear_model import LogisticRegressionCV as logregcv
 from sklearn.linear_model import LogisticRegression as logreg
 from mpl_toolkits.axes_grid1 import Divider, Size
 
-
 import licking_behavior_NP.psy_tools as ps
 import licking_behavior_NP.psy_style as pstyle
 import licking_behavior_NP.psy_metrics_tools as pm
