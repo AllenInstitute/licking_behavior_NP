@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-import psy_tools as ps
-import psy_general_tools as pgt
+import licking_behavior_NP.psy_tools as ps
+import licking_behavior_NP.psy_general_tools as pgt
 
 def get_model_versions(vrange=[20,22]):
     '''

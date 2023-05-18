@@ -1,11 +1,11 @@
-import psy_tools as ps
-import psy_analysis as pa
-import psy_general_tools as pgt
-import psy_visualization as pv
-import psy_output_tools as po
+import licking_behavior_NP.psy_tools as ps
+import licking_behavior_NP.psy_analysis as pa
+import licking_behavior_NP.psy_general_tools as pgt
+import licking_behavior_NP.psy_visualization as pv
+import licking_behavior_NP.psy_output_tools as po
 import matplotlib.pyplot as plt
-import build_timing_regressor as b
-import psy_metrics_tools as pm
+import licking_behavior_NP.build_timing_regressor as b
+import licking_behavior_NP.psy_metrics_tools as pm
 import numpy as np
 plt.ion()
 

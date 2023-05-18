@@ -14,10 +14,10 @@ from sklearn.linear_model import LogisticRegression as logreg
 from mpl_toolkits.axes_grid1 import Divider, Size
 
 
-import psy_tools as ps
-import psy_style as pstyle
-import psy_metrics_tools as pm
-import psy_general_tools as pgt
+import licking_behavior_NP.psy_tools as ps
+import licking_behavior_NP.psy_style as pstyle
+import licking_behavior_NP.psy_metrics_tools as pm
+import licking_behavior_NP.psy_general_tools as pgt
 
 def plot_session_summary(summary_df,version=None,savefig=False,group=None):
     '''

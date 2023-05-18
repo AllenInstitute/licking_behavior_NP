@@ -1,5 +1,5 @@
 import numpy as np
-import psy_general_tools as pgt
+import licking_behavior_NP.psy_general_tools as pgt
 from scipy.stats import norm
 
 '''

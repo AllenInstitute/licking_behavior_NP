@@ -4,10 +4,10 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
-import psy_style as pstyle
-import psy_visualization as pv
-import psy_general_tools as pgt
-import psy_metrics_tools as pm
+import licking_behavior_NP.psy_style as pstyle
+import licking_behavior_NP.psy_visualization as pv
+import licking_behavior_NP.psy_general_tools as pgt
+import licking_behavior_NP.psy_metrics_tools as pm
 
 ## Counting/Timing interval analysis
 #######################################################################

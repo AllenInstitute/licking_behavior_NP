@@ -6,11 +6,11 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-import psy_tools as ps
-import psy_style as pstyle
-import psy_visualization as pv
-import psy_general_tools as pgt
-import psy_metrics_tools as pm
+import licking_behavior_NP.psy_tools as ps
+import licking_behavior_NP.psy_style as pstyle
+import licking_behavior_NP.psy_visualization as pv
+import licking_behavior_NP.psy_general_tools as pgt
+import licking_behavior_NP.psy_metrics_tools as pm
 
 
 def build_timing_schematic(session=None, version=None, savefig=False):

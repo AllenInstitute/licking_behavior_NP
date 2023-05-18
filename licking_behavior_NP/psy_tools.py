@@ -12,9 +12,9 @@ import psytrack as psy
 from psytrack.helper.crossValidation import split_data
 from psytrack.helper.crossValidation import xval_loglike
 
-import psy_style as pstyle
-import psy_metrics_tools as pm
-import psy_general_tools as pgt
+import licking_behavior_NP.psy_style as pstyle
+import licking_behavior_NP.psy_metrics_tools as pm
+import licking_behavior_NP.psy_general_tools as pgt
 
 
 def load(filepath):
