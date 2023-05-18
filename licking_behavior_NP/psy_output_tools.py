@@ -8,13 +8,15 @@ from tqdm import tqdm
 import licking_behavior_NP.psy_tools as ps
 import licking_behavior_NP.psy_general_tools as pgt
 
+BEHAVIOR_DIR = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/behavior/'
+
 def get_model_versions(vrange=[20,22]):
     '''
         Returns a sorted list of behavior model versions
     '''
     
     # Get all versions
-    behavior_dir = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/behavior/'
+    behavior_dir = BEHAVIOR_DIR 
     versions = os.listdir(behavior_dir)
     versions = [x for x in versions if x.startswith('psy_fits_v')]
     version_numbers = [int(x[10:]) for x in versions]
@@ -102,7 +104,7 @@ def make_version(VERSION):
  
     # Make appropriate folders
     print('Making directory structure') 
-    root_directory  = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/behavior/'
+    root_directory  = BEHAVIOR_DIR 
     directory = root_directory+'psy_fits_v'+str(VERSION)
     if not os.path.isdir(directory):
         os.mkdir(directory)
@@ -125,9 +127,9 @@ def make_version(VERSION):
 
 def save_version_parameters(VERSION):
     git_branch = subprocess.check_output(['git','branch','--show-current'],\
-        cwd='/allen/programs/braintv/workgroups/nc-ophys/alex.piet/behavior/licking_behavior/src').strip().decode() 
+        cwd='/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/licking_behavior_NP/licking_behavior_NP').strip().decode() 
     git_hash = subprocess.check_output(['git','rev-parse','--short','HEAD'],\
-        cwd='/allen/programs/braintv/workgroups/nc-ophys/alex.piet/behavior/licking_behavior/src').strip().decode()
+        cwd='/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/licking_behavior_NP/licking_behavior_NP').strip().decode()
     format_options = {
                 'timing0/1':True,
                 'mean_center':True,
@@ -139,7 +141,7 @@ def save_version_parameters(VERSION):
                 'git_branch':git_branch
                 }
     
-    json_path = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/behavior/psy_fits_v'+str(VERSION)+'/summary_data/behavior_model_params.json'
+    json_path = BEHAVIOR_DIR+'psy_fits_v'+str(VERSION)+'/summary_data/behavior_model_params.json'
     with open(json_path, 'w') as json_file:
         json.dump(format_options, json_file, indent=4)
 

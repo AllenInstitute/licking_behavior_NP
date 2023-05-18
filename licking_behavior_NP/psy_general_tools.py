@@ -19,6 +19,8 @@ updated 04/07/2020
 updated 03/01/2021
 updated 02/11/2022
 '''
+
+BEHAVIOR_DIR = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/behavior/'
 def get_debugging_id(num=1):
     '''
         Just a series of behavior_session_ids used as fixed debugging examples
@@ -38,7 +40,7 @@ def get_debugging_id(num=1):
     return test_ids[num]
 
 def get_directory(version,verbose=False,subdirectory=None,group=None):
-    root_directory  = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/behavior/'
+    root_directory  = BEHAVIOR_DIR 
     if subdirectory =='fits':
         subdir = 'session_fits/'
     elif subdirectory == "strategy_df":
@@ -167,7 +169,7 @@ def add_n_relative_to_first_novel(df):
     return df
 
 def load_version_parameters(VERSION):
-    json_path = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/behavior/psy_fits_v'+str(VERSION)+'/summary_data/behavior_model_params.json'
+    json_path = BEHAVIOR_DIR+'psy_fits_v'+str(VERSION)+'/summary_data/behavior_model_params.json'
     with open(json_path,'r') as json_file:
         format_options = json.load(json_file)
     return format_options
