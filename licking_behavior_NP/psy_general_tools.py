@@ -2,11 +2,9 @@ import json
 import numpy as np
 import pandas as pd
 from pathlib import Path
-#from visual_behavior.data_access import reformat 
 
 from allensdk.brain_observatory.behavior.behavior_project_cache import \
     VisualBehaviorNeuropixelsProjectCache
-
 
 '''
 This is a set of general purpose functions for interacting with the SDK
@@ -90,14 +88,106 @@ def get_data(esid):
 
     print('Adding stimulus annotations')
     # Get extended stimulus presentations
-    reformat.add_licks_each_flash(session.stimulus_presentations_np, session.licks) 
-    reformat.add_rewards_each_flash(session.stimulus_presentations_np, session.rewards)
-    session.stimulus_presentations_np['licked'] = [True if len(licks) > 0 else False \
-        for licks in session.stimulus_presentations_np.licks.values]
-    reformat.add_time_from_last_change(session.stimulus_presentations_np) 
-    reformat.add_time_from_last_lick(session.stimulus_presentations_np, session.licks)
-    reformat.add_time_from_last_reward(session.stimulus_presentations_np, session.rewards)
+    add_licks_each_flash(session) 
+    add_rewards_each_flash(session)
+    #add_time_from_last_change(session.stimulus_presentations_np) 
+    #add_time_from_last_lick(session.stimulus_presentations_np, session.licks)
+    #add_time_from_last_reward(session.stimulus_presentations_np, session.rewards)
     return session
+
+def add_licks_each_flash(session):
+    licks_each_flash = add_licks_each_flash_inner(session.stimulus_presentations_np,
+                                            session.licks)
+    session.stimulus_presentations_np['licks'] = licks_each_flash
+    session.stimulus_presentations_np['licked'] = [True if len(licks) > 0 else False \
+        for licks in session.stimulus_presentations_np.licks.values]   
+
+def add_licks_each_flash_inner(stimulus_presentations_df, licks_df,
+                     range_relative_to_stimulus_start=[0, 0.75]):
+    '''
+    Append a column to stimulus_presentations which contains the timestamps of licks that occur
+    in a range relative to the onset of the stimulus.
+
+    Args:
+        stimulus_presentations_df (pd.DataFrame): dataframe of stimulus presentations.
+            Must contain: 'start_time'
+        licks_df (pd.DataFrame): lick dataframe. Must contain 'timestamps'
+        range_relative_to_stimulus_start (list with 2 elements): start and end of the range
+            relative to the start of each stimulus to average the running speed.
+    Returns:
+        licks_each_flash (pd.Series): lick times that fell within the window 
+    '''
+
+    lick_times = licks_df['timestamps'].values
+    stimulus_presentations_df['next_start'] = stimulus_presentations_df['start_time'].shift(-1)
+    stimulus_presentations_df.at[stimulus_presentations_df.index[-1], 'next_start'] = \
+        stimulus_presentations_df.iloc[-1]['start_time'] + .75
+    licks_each_flash = stimulus_presentations_df.apply(
+        lambda row: lick_times[
+            ((
+                lick_times > row["start_time"]
+            ) & (
+                lick_times <= row["next_start"]
+            ))
+        ],
+        axis=1,
+    )
+    stimulus_presentations_df.drop(columns=['next_start'], inplace=True)
+    return licks_each_flash
+
+def add_rewards_each_flash(session):
+    '''
+    Append a column to stimulus_presentations which contains the timestamps of rewards that occur
+    in a range relative to the onset of the stimulus.
+
+    Args:
+        stimulus_presentations (pd.DataFrame): dataframe of stimulus presentations.
+            Must contain: 'start_time'
+        rewards (pd.DataFrame): rewards dataframe. Must contain 'timestamps'
+        range_relative_to_stimulus_start (list with 2 elements): start and end of the range
+            relative to the start of each stimulus to average the running speed.
+    Returns:
+        nothing. session.stimulus_presentations is modified in place with 'rewards' column added
+    '''
+
+    rewards_each_flash = add_rewards_each_flash_inner(session.stimulus_presentations_np,
+                                                session.rewards)
+    session.stimulus_presentations_np['rewards'] = rewards_each_flash
+    
+def add_rewards_each_flash_inner(stimulus_presentations_df, rewards_df,
+                       range_relative_to_stimulus_start=[0, 0.75]):
+    '''
+    Append a column to stimulus_presentations which contains the timestamps of rewards that occur
+    in a range relative to the onset of the stimulus.
+
+    Args:
+        stimulus_presentations_df (pd.DataFrame): dataframe of stimulus presentations.
+            Must contain: 'start_time'
+        rewards_df (pd.DataFrame): rewards dataframe. Must contain 'timestamps'
+        range_relative_to_stimulus_start (list with 2 elements): start and end of the range
+            relative to the start of each stimulus to average the running speed.
+    Returns:
+        rewards_each_flash (pd.Series): reward times that fell within the window
+    '''
+
+    reward_times = rewards_df['timestamps'].values
+    stimulus_presentations_df['next_start'] = stimulus_presentations_df['start_time'].shift(-1)
+    stimulus_presentations_df.at[stimulus_presentations_df.index[-1], 'next_start'] = \
+        stimulus_presentations_df.iloc[-1]['start_time'] + .75
+    rewards_each_flash = stimulus_presentations_df.apply(
+        lambda row: reward_times[
+            ((
+                reward_times > row["start_time"]
+            ) & (
+                reward_times <= row["next_start"]
+            ))
+        ],
+        axis=1,
+    )
+    stimulus_presentations_df.drop(columns=['next_start'], inplace=True)
+
+    return rewards_each_flash
+
 
 def moving_mean(values, window,mode='valid'):
     '''
