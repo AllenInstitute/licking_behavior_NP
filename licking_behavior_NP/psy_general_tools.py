@@ -5,9 +5,7 @@ from pathlib import Path
 from visual_behavior.data_access import reformat 
 import visual_behavior.data_access.loading as loading
 import visual_behavior.data_access.utilities as utilities
-#from allensdk.brain_observatory.behavior.behavior_session import BehaviorSession
-#from allensdk.brain_observatory.behavior.behavior_ophys_session import \
-#    BehaviorOphysSession
+
 
 from allensdk.brain_observatory.behavior.behavior_project_cache import \
     VisualBehaviorNeuropixelsProjectCache
@@ -21,26 +19,11 @@ updated 01/22/2020
 updated 04/07/2020
 updated 03/01/2021
 updated 02/11/2022
+ported to NP data 05/2023
 '''
 
 BEHAVIOR_DIR = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/behavior/'
-def get_debugging_id(num=1):
-    '''
-        Just a series of behavior_session_ids used as fixed debugging examples
-    '''
-    test_ids = {
-    1:951520319,
-    2:957032492,
-    3:1041977344,
-    4:873695653,
-    5:824894721,
-    6:907053876,
-    7:894083470,
-    8:820124540,
-    9:1066967257,
-    10:884808160
-    } 
-    return test_ids[num]
+
 
 def get_directory(version,verbose=False,subdirectory=None,group=None):
     root_directory  = BEHAVIOR_DIR 
@@ -70,110 +53,16 @@ def get_directory(version,verbose=False,subdirectory=None,group=None):
     directory = root_directory+'psy_fits_v'+str(version)+'/'+subdir
     return directory
 
-def get_np_session_table():
-    
-    print('In development! Tread carefully')
+def get_np_manifest():
+    '''
+        Returns a dataframe of the NP sessions
+    '''
     cache_dir = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/data/'
     cache = VisualBehaviorNeuropixelsProjectCache.from_s3_cache(cache_dir=Path(cache_dir))
-    return cache
-    #np_table= pd.read_csv(filename)
-    #np_table['EPHYS_session_type'] = [
-    #    x.startswith('EPHYS') for x in np_table['session_type']]  
-    #np_table['EPHYS_rig'] = [x in ["NP.1", "NP.0"] for x in np_table['equipment_name']]
-    #np_table['EPHYS'] = np_table['EPHYS_rig'] & np_table['EPHYS_session_type'] 
-    #return np_table
-
-def get_ophys_experiment_table():
-    '''
-        Returns a table of all the ophys experiments in the platform paper cache
-    '''
-    raise Exception('You probably want get_ophys_session_table')
-    cache_dir = r'//allen/programs/braintv/workgroups/nc-ophys/visual_behavior/platform_paper_cache'
-    cache = VisualBehaviorOphysProjectCache.from_s3_cache(cache_dir=cache_dir)
-    experiments_table = cache.get_ophys_experiment_table()
-    experiments_table = experiments_table[
-        (experiments_table.project_code!="VisualBehaviorMultiscope4areasx2d")&\
-        (experiments_table.reporter_line!="Ai94(TITL-GCaMP6s)")].reset_index()
-    return experiments_table
-    
-def get_ophys_session_table(include_4x2=False):
-    '''
-        Returns a table of all the ophys sessions in the platform paper cache
-        include_4x2 (bool), removes 4x2 Multiscope data
-    '''
-    cache_dir = r'//allen/programs/braintv/workgroups/nc-ophys/visual_behavior/platform_paper_cache'
-    cache = VisualBehaviorOphysProjectCache.from_s3_cache(cache_dir=cache_dir)
-    session_table = cache.get_ophys_session_table()
-    if include_4x2:
-        session_table = session_table[\
-            session_table.reporter_line!="Ai94(TITL-GCaMP6s)"\
-            ].reset_index()   
-    else:
-        session_table = session_table[
-            (session_table.project_code!="VisualBehaviorMultiscope4areasx2d")&\
-            (session_table.reporter_line!="Ai94(TITL-GCaMP6s)")]\
-            .reset_index()
-    return session_table
-
-def get_ophys_manifest(include_4x2=False):
-    '''
-        Build a table that contains all active ophys sessions
-        Adds columns for whether the mouse trained on image set A or B
-    '''    
-    manifest = get_ophys_session_table(include_4x2=include_4x2)
-    manifest['active'] = manifest['session_type'].isin([
-        'OPHYS_1_images_A', 'OPHYS_3_images_A', 'OPHYS_4_images_A', 
-        'OPHYS_6_images_A',  'OPHYS_1_images_B', 'OPHYS_3_images_B', 
-        'OPHYS_4_images_B', 'OPHYS_6_images_B','OPHYS_1_images_G',
-        'OPHYS_3_images_G','OPHYS_4_images_G','OPHYS_6_images_G',
-        'OPHYS_1_images_H','OPHYS_3_images_H','OPHYS_4_images_H',
-        'OPHYS_6_images_H'])
-    manifest['trained_A'] = manifest.session_type.isin([
-        'OPHYS_1_images_A','OPHYS_2_images_A_passive','OPHYS_3_images_A',
-        'OPHYS_4_images_B','OPHYS_5_images_B_passive','OPHYS_6_images_B'])
-    manifest['trained_B'] = manifest.session_type.isin([
-        'OPHYS_1_images_B','OPHYS_2_images_B_passive','OPHYS_3_images_B',
-        'OPHYS_4_images_A','OPHYS_5_images_A_passive','OPHYS_6_images_A'])
-    manifest['novel_session'] = [x in [4,5,6] for x in manifest.session_number]
-    manifest = utilities.add_experience_level_to_experiment_table(manifest)
-    manifest = add_detailed_experience_level(manifest)
-    manifest = manifest.sort_index()
-    manifest = manifest.query('active')
-    return manifest
-
-
-def add_detailed_experience_level(manifest):
-    '''
-        Replacement for messy functions in visual_behavior.data_access.utilities
-    '''
-    manifest = utilities.add_date_string(manifest)  
-    manifest = add_n_relative_to_first_novel(manifest) 
-    manifest = utilities.add_last_familiar_column(manifest)
-    manifest = utilities.add_second_novel_column(manifest)
-    manifest['strict_experience'] = (manifest['experience_level'] == 'Novel 1') |\
-        (manifest['last_familiar']) | (manifest['second_novel'])
-    return manifest
-
-
-def add_n_relative_to_first_novel(df):
-    """
-    Add a column called 'n_relative_to_first_novel' that indicates the session 
-    number relative to the first novel session for each experiment in a container.
-    If a container does not have a first novel session, the value of 
-    n_relative_to_novel for all experiments in the container is NaN.
-    Input df must have column 'experience_level' and 'date'
-    Input df is typically ophys_experiment_table
-    """
-    # add simplified string date column for accurate sorting
-
-    df = df.sort_values(by=['mouse_id', 'date'])  # must sort for ordering to be accurate
-    numbers = df.groupby('mouse_id').apply(utilities.get_n_relative_to_first_novel)
-    df['n_relative_to_first_novel'] = np.nan
-    for mouse_id in df.mouse_id.unique():
-        indices = df[df.mouse_id == mouse_id].index.values
-        df.loc[indices, 'n_relative_to_first_novel'] = \
-            list(numbers.loc[mouse_id].n_relative_to_first_novel)
-    return df
+    np_table = cache.get_ecephys_session_table(filter_abnormalities=False)
+    np_table = np_table.sort_index()
+    return np_table
+ 
 
 def load_version_parameters(VERSION):
     json_path = BEHAVIOR_DIR+'psy_fits_v'+str(VERSION)+'/summary_data/behavior_model_params.json'
@@ -181,35 +70,16 @@ def load_version_parameters(VERSION):
         format_options = json.load(json_file)
     return format_options
 
-def get_data(bsid,OPHYS=False, NP=False):
+def get_data(esid):
     '''
         Loads data from SDK interface
-        ARGS: bsid to load
-        if OPHYS is true, loads data from the OPHYS api
+        ARGS: ecephys_session_id to load
     '''
-    assert not (OPHYS and NP), "Cannot have both OPHYS and NP Flags"
 
     # Get SDK session object
     print('Loading SDK object')
-    if OPHYS:
-        # pick an associated experiment_id
-        table =\
-            loading.get_filtered_ophys_experiment_table(release_data_only=True)\
-            .reset_index()
-        oeid = \
-            table.query('behavior_session_id == @bsid').iloc[0]['ophys_experiment_id']
-        session = BehaviorOphysSession.from_lims(oeid)
-    elif NP:
-        raise Exception('Not implemented')
-        # from allensdk.brain_observatory.ecephys.behavior_ecephys_session import VBNBehaviorSession
-        # directory as of May 5th, 2022. Should update once data is released
-        # nwb_dir = '/allen/programs/mindscope/workgroups/np-behavior/vbn_data_release/nwbs_220429/'
-        # somehow get esid
-        # filepath = nwb_dir + 'ecephys_session_'+esid+'.nwb'
-        # session = VBNBehaviorSession.from_nwb_path(filepath) 
-        # gives a KeyError
-    else:
-        session = BehaviorSession.from_lims(bsid)
+    session = cache.get_ecephys_session(ecephys_session_id=esid)
+
 
     print('Checking for early omission')
     while session.stimulus_presentations.iloc[0]['omitted'] == True:
@@ -342,10 +212,8 @@ def get_strategy_list(version):
 
         Raises an exception if the model version is not recognized. 
     '''
-    if version in [20,21]:
+    if version in [100]:
         strategies=['bias','omissions','omissions1','task0','timing1D']
-    elif version in [22]:
-        strategies=['bias','task0','timing1D']
     else:
         raise Exception('Unknown model version')
     return strategies
