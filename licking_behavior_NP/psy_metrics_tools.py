@@ -12,7 +12,7 @@ Alex Piet, alexpiet@gmail.com
 
 def get_metrics(session):
     '''
-        Top level function that appends a few columns to session.stimulus_presentations,
+        Top level function that appends a few columns to session.stimulus_presentations_np,
             and a few columns to session.licks 
 
         ARGUMENTS: session, SDK session object
@@ -28,7 +28,7 @@ def get_metrics(session):
             bout_rewarded,  (boolean) 
             bout_num_rewards,(int) 
 
-        Adds to session.stimulus_presentations
+        Adds to session.stimulus_presentations_np
             bout_start,     (boolean)
             num_bout_start, (int)
             bout_number,    (int)
@@ -80,23 +80,21 @@ def annotate_licks(session):
             inplace=True,errors='ignore')
 
     # Remove licks that happen outside of stimulus period
-    stim_start=session.stimulus_presentations.query('not omitted')['start_time'].values[0]
-    stim_end = session.stimulus_presentations['start_time'].values[-1]+0.75
+    stim_start=session.stimulus_presentations_np.query('~omitted')['start_time'].values[0]
+    stim_end = session.stimulus_presentations_np['start_time'].values[-1]+0.75
     session.licks.query('(timestamps > @stim_start) and (timestamps <= @stim_end)',
         inplace=True)
     session.licks.reset_index(drop=True,inplace=True)
 
     # Computing ILI for each lick 
     session.licks['pre_ili'] = np.concatenate([
-        [np.nan],np.diff(session.licks.timestamps.values)])
+        [bout_threshold*2],np.diff(session.licks.timestamps.values)])
     session.licks['post_ili'] = np.concatenate([
-        np.diff(session.licks.timestamps.values),[np.nan]])
+        np.diff(session.licks.timestamps.values),[bout_threshold*2]])
 
     # Segment licking bouts
     session.licks['bout_start'] = session.licks['pre_ili'] > bout_threshold
     session.licks['bout_end'] = session.licks['post_ili'] > bout_threshold
-    session.licks.at[session.licks['pre_ili'].apply(np.isnan),'bout_start']=True
-    session.licks.at[session.licks['post_ili'].apply(np.isnan),'bout_end']=True
     session.licks['bout_number'] = np.cumsum(session.licks['bout_start'])
 
     # Annotate rewards
@@ -104,7 +102,7 @@ def annotate_licks(session):
     session.licks['rewarded'] = False # Setting default to False
     session.licks['num_rewards'] = 0 
     for index, row in session.rewards.iterrows():
-        if row.autorewarded:
+        if False:#row.autorewarded:
             # Assign to nearest lick
             mylick = np.abs(session.licks.timestamps - row.timestamps).idxmin()
         else:
@@ -122,7 +120,7 @@ def annotate_licks(session):
     x = session.licks.groupby('bout_number').any('rewarded').\
         rename(columns={'rewarded':'bout_rewarded'})
     y = session.licks.groupby('bout_number')['num_rewards'].sum().\
-        rename(columns={'num_rewards':'bout_num_rewards'})
+        rename('bout_num_rewards')
     session.licks['bout_rewarded'] = False
     temp = session.licks.reset_index().set_index('bout_number')
     temp.update(x)
@@ -157,9 +155,9 @@ def annotate_licks(session):
 
 def annotate_bouts(session):
     '''
-        Uses the bout annotations in licks to annotate stimulus_presentations
+        Uses the bout annotations in licks to annotate stimulus_presentations_np
 
-        Adds to session.stimulus_presentations
+        Adds to session.stimulus_presentations_np
             bout_start,     (boolean) Whether a licking bout started during this image
             num_bout_start, (int) The number of licking bouts that started during this
                             image. This can be greater than 1 because the bout duration
@@ -173,70 +171,70 @@ def annotate_bouts(session):
     '''
     # Annotate Bout Starts
     bout_starts = session.licks[session.licks['bout_start']]
-    session.stimulus_presentations['bout_start'] = False
-    session.stimulus_presentations['num_bout_start'] = 0
+    session.stimulus_presentations_np['bout_start'] = False
+    session.stimulus_presentations_np['num_bout_start'] = 0
     for index,x in bout_starts.iterrows():
-        filter_start = session.stimulus_presentations.query('start_time < @x.timestamps')
+        filter_start = session.stimulus_presentations_np.query('start_time < @x.timestamps')
         if len(filter_start) > 0:
             # Mark the last stimulus that started before the bout started
             start_index = filter_start.index[-1]
-            session.stimulus_presentations.at[start_index,'bout_start'] = True
-            session.stimulus_presentations.at[start_index,'num_bout_start'] += 1
-            session.stimulus_presentations.at[start_index,'bout_number'] = x.bout_number
-        elif x.timestamps <= session.stimulus_presentations.iloc[0].start_time:
+            session.stimulus_presentations_np.at[start_index,'bout_start'] = True
+            session.stimulus_presentations_np.at[start_index,'num_bout_start'] += 1
+            session.stimulus_presentations_np.at[start_index,'bout_number'] = x.bout_number
+        elif x.timestamps <= session.stimulus_presentations_np.iloc[0].start_time:
             # Bout started before stimulus, mark the first stimulus as start
-            session.stimulus_presentations.at[0,'bout_start'] = True
-            session.stimulus_presentations.at[0,'num_bout_start'] += 1
+            session.stimulus_presentations_np.at[0,'bout_start'] = True
+            session.stimulus_presentations_np.at[0,'num_bout_start'] += 1
         else:
             raise Exception('couldnt annotate bout start (bout number: {})'.format(index))
 
     # Annotate Bout Ends
     bout_ends = session.licks[session.licks['bout_end']]
-    session.stimulus_presentations['bout_end'] = False
-    session.stimulus_presentations['num_bout_end'] = 0
+    session.stimulus_presentations_np['bout_end'] = False
+    session.stimulus_presentations_np['num_bout_end'] = 0
     for index,x in bout_ends.iterrows():
-        filter_end = session.stimulus_presentations.query('start_time < @x.timestamps')
+        filter_end = session.stimulus_presentations_np.query('start_time < @x.timestamps')
         if len(filter_end) > 0:
             # Mark the last stimulus that started before the bout ended
             end_index = filter_end.index[-1]
-            session.stimulus_presentations.at[end_index,'bout_end'] = True
-            session.stimulus_presentations.at[end_index,'num_bout_end'] += 1   
-        elif x.timestamps <= session.stimulus_presentations.iloc[0].start_time:
+            session.stimulus_presentations_np.at[end_index,'bout_end'] = True
+            session.stimulus_presentations_np.at[end_index,'num_bout_end'] += 1   
+        elif x.timestamps <= session.stimulus_presentations_np.iloc[0].start_time:
             # Bout started before stimulus, mark the first stimulus as start
-            session.stimulus_presentations.at[0,'bout_end'] = True
-            session.stimulus_presentations.at[0,'num_bout_end'] += 1
+            session.stimulus_presentations_np.at[0,'bout_end'] = True
+            session.stimulus_presentations_np.at[0,'num_bout_end'] += 1
         else:
             raise Exception('couldnt annotate bout end (bout number: {})'.format(index))
 
     # Annotate In-Bout
-    session.stimulus_presentations['in_lick_bout'] = \
-        session.stimulus_presentations['num_bout_start'].cumsum() > \
-        session.stimulus_presentations['num_bout_end'].cumsum()
-    session.stimulus_presentations['in_lick_bout'] = \
-        session.stimulus_presentations['in_lick_bout'].shift(fill_value=False)
-    overlap_index = (session.stimulus_presentations['in_lick_bout']) &\
-                    (session.stimulus_presentations['bout_start']) &\
-                    (session.stimulus_presentations['num_bout_end'] >=1)
-    session.stimulus_presentations.at[overlap_index,'in_lick_bout'] = False
+    session.stimulus_presentations_np['in_lick_bout'] = \
+        session.stimulus_presentations_np['num_bout_start'].cumsum() > \
+        session.stimulus_presentations_np['num_bout_end'].cumsum()
+    session.stimulus_presentations_np['in_lick_bout'] = \
+        session.stimulus_presentations_np['in_lick_bout'].shift(fill_value=False)
+    overlap_index = (session.stimulus_presentations_np['in_lick_bout']) &\
+                    (session.stimulus_presentations_np['bout_start']) &\
+                    (session.stimulus_presentations_np['num_bout_end'] >=1)
+    session.stimulus_presentations_np.loc[overlap_index,'in_lick_bout'] = False
 
     # QC
-    num_bouts_sp_start = session.stimulus_presentations['num_bout_start'].sum()
-    num_bouts_sp_end = session.stimulus_presentations['num_bout_end'].sum()
+    num_bouts_sp_start = session.stimulus_presentations_np['num_bout_start'].sum()
+    num_bouts_sp_end = session.stimulus_presentations_np['num_bout_end'].sum()
     num_bouts_licks = session.licks.bout_start.sum()
     assert num_bouts_sp_start == num_bouts_licks, \
         "Number of bouts doesnt match between licks table and stimulus table"
     assert num_bouts_sp_start == num_bouts_sp_end, \
         "Mismatch between bout starts and bout ends"
-    assert session.stimulus_presentations.query('bout_start')['licked'].all(),\
+    assert session.stimulus_presentations_np.query('bout_start')['licked'].all(),\
         "All licking bout start should have licks" 
-    assert session.stimulus_presentations.query('bout_end')['licked'].all(),\
+    assert session.stimulus_presentations_np.query('bout_end')['licked'].all(),\
         "All licking bout ends should have licks" 
-    assert np.all(session.stimulus_presentations['in_lick_bout'] |\
-        session.stimulus_presentations['bout_start'] |\
-        ~session.stimulus_presentations['licked']), \
+    assert np.all(session.stimulus_presentations_np['in_lick_bout'] |\
+        session.stimulus_presentations_np['bout_start'] |\
+        ~session.stimulus_presentations_np['licked']), \
         "must either not have licked, or be in lick bout, or bout start"
-    assert np.all(~(session.stimulus_presentations['in_lick_bout'] &\
-        session.stimulus_presentations['bout_start'])),\
+    assert np.all(~(session.stimulus_presentations_np['in_lick_bout'] &\
+        session.stimulus_presentations_np['bout_start'])),\
         "Cant be in a bout and a bout_start"
 
 
@@ -249,7 +247,7 @@ def annotate_image_rolling_metrics(session,win_dur=640, win_type='gaussian',win_
         Units are either 1/image or 1/s. We arrive at 1/s by:
         (1/image) * (1 image / 0.75s) = (1/s)
 
-        Adds to session.stimulus_presentations
+        Adds to session.stimulus_presentations_np
             num_licks,              (int) number of licks on each image cycle
             lick_rate,              (licks/seconds) 
             rewarded,               (boolean)   Whether this stimulus was rewarded
@@ -273,102 +271,102 @@ def annotate_image_rolling_metrics(session,win_dur=640, win_type='gaussian',win_
             engaged,                (boolean)
     '''
     # Get Lick Rate / second
-    session.stimulus_presentations['num_licks'] = [len(x) for x in \
-        session.stimulus_presentations['licks']]
-    session.stimulus_presentations['lick_rate'] = \
-        session.stimulus_presentations['num_licks'].\
+    session.stimulus_presentations_np['num_licks'] = [len(x) for x in \
+        session.stimulus_presentations_np['licks']]
+    session.stimulus_presentations_np['lick_rate'] = \
+        session.stimulus_presentations_np['num_licks'].\
         rolling(win_dur, min_periods=1,win_type=win_type,center=True).\
         mean(std=win_std)/.75
 
     # Get Reward Rate / second
-    session.stimulus_presentations['rewarded'] = [len(this_reward) > 0 \
-        for this_reward in session.stimulus_presentations['rewards']]
-    session.stimulus_presentations['reward_rate'] = \
-        session.stimulus_presentations['rewarded'].\
+    session.stimulus_presentations_np['rewarded'] = [len(this_reward) > 0 \
+        for this_reward in session.stimulus_presentations_np['rewards']]
+    session.stimulus_presentations_np['reward_rate'] = \
+        session.stimulus_presentations_np['rewarded'].\
         rolling(win_dur,min_periods=1,win_type=win_type,center=True).\
         mean(std=win_std)/.75
 
     # Get Bout Rate / second
-    session.stimulus_presentations['bout_rate'] = \
-        session.stimulus_presentations['bout_start'].\
+    session.stimulus_presentations_np['bout_rate'] = \
+        session.stimulus_presentations_np['bout_start'].\
         rolling(win_dur,min_periods=1, win_type=win_type,center=True).\
         mean(std=win_std)/.75
 
     # Get Hit Fraction. % of lick bouts that are rewarded
-    session.stimulus_presentations['hit_bout'] = \
+    session.stimulus_presentations_np['hit_bout'] = \
         [np.nan if (not x[0]) else 1 if (x[1]==1) else 0 
-        for x in zip(session.stimulus_presentations['bout_start'], \
-        session.stimulus_presentations['rewarded'])]
-    session.stimulus_presentations['lick_hit_fraction'] = \
-        session.stimulus_presentations['hit_bout'].\
+        for x in zip(session.stimulus_presentations_np['bout_start'], \
+        session.stimulus_presentations_np['rewarded'])]
+    session.stimulus_presentations_np['lick_hit_fraction'] = \
+        session.stimulus_presentations_np['hit_bout'].\
         rolling(win_dur,min_periods=1,win_type=win_type,center=True).\
         mean(std=win_std).fillna(0)
     
     # Get Hit Rate, % of change images with licks
-    session.stimulus_presentations['change_with_lick'] = \
+    session.stimulus_presentations_np['change_with_lick'] = \
         [np.nan if (not x[0]) else 1 if (x[1]) else 0 
-        for x in zip(session.stimulus_presentations['is_change'],\
-        session.stimulus_presentations['rewarded'])]
-    session.stimulus_presentations['hit_rate'] = \
-        session.stimulus_presentations['change_with_lick'].\
+        for x in zip(session.stimulus_presentations_np['is_change'],\
+        session.stimulus_presentations_np['rewarded'])]
+    session.stimulus_presentations_np['hit_rate'] = \
+        session.stimulus_presentations_np['change_with_lick'].\
         rolling(win_dur, min_periods=1,win_type=win_type,center=True).\
         mean(std=win_std).fillna(0)
   
     # Get Miss Rate, % of change images without licks
-    session.stimulus_presentations['change_without_lick'] = \
+    session.stimulus_presentations_np['change_without_lick'] = \
         [np.nan if (not x[0]) else 0 if (x[1]) else 1 
-        for x in zip(session.stimulus_presentations['is_change'],\
-        session.stimulus_presentations['rewarded'])]
-    session.stimulus_presentations['miss_rate'] = \
-        session.stimulus_presentations['change_without_lick'].\
+        for x in zip(session.stimulus_presentations_np['is_change'],\
+        session.stimulus_presentations_np['rewarded'])]
+    session.stimulus_presentations_np['miss_rate'] = \
+        session.stimulus_presentations_np['change_without_lick'].\
         rolling(win_dur,min_periods=1,win_type=win_type,center=True).\
         mean(std=win_std).fillna(0)
 
     # Get False Alarm Rate, % of non-change images with licks
-    session.stimulus_presentations['non_change_with_lick'] = \
+    session.stimulus_presentations_np['non_change_with_lick'] = \
         [np.nan if (x[0]) else 1 if (x[1]) else 0 
-        for x in zip(session.stimulus_presentations['is_change'],\
-        session.stimulus_presentations['bout_start'])]
-    session.stimulus_presentations['false_alarm_rate'] = \
-        session.stimulus_presentations['non_change_with_lick'].\
+        for x in zip(session.stimulus_presentations_np['is_change'],\
+        session.stimulus_presentations_np['bout_start'])]
+    session.stimulus_presentations_np['false_alarm_rate'] = \
+        session.stimulus_presentations_np['non_change_with_lick'].\
         rolling(win_dur,min_periods=1,win_type=win_type,center=True).\
         mean(std=win_std).fillna(0)
 
     # Get Correct Reject Rate, % of non-change images without licks
-    session.stimulus_presentations['non_change_without_lick'] = \
+    session.stimulus_presentations_np['non_change_without_lick'] = \
         [np.nan if (x[0] or (x[2] and not x[1])) else 0 if (x[1]) else 1 
-        for x in zip(session.stimulus_presentations['is_change'],\
-        session.stimulus_presentations['bout_start'],\
-        session.stimulus_presentations['licked'])]
-    session.stimulus_presentations['correct_reject_rate'] = \
-        session.stimulus_presentations['non_change_without_lick'].\
+        for x in zip(session.stimulus_presentations_np['is_change'],\
+        session.stimulus_presentations_np['bout_start'],\
+        session.stimulus_presentations_np['licked'])]
+    session.stimulus_presentations_np['correct_reject_rate'] = \
+        session.stimulus_presentations_np['non_change_without_lick'].\
         rolling(win_dur,min_periods=1,win_type=win_type,center=True).\
         mean(std=win_std).fillna(0)
 
     # Get dPrime and Criterion metrics on an image level
     # Computing the criterion to be negative
     Z = norm.ppf
-    session.stimulus_presentations['d_prime'] = \
-        Z(np.clip(session.stimulus_presentations['hit_rate'],0.01,0.99)) - \
-        Z(np.clip(session.stimulus_presentations['false_alarm_rate'],0.01,0.99)) 
-    session.stimulus_presentations['criterion'] = \
-        0.5*(Z(np.clip(session.stimulus_presentations['hit_rate'],0.01,0.99)) + \
-        Z(np.clip(session.stimulus_presentations['false_alarm_rate'],0.01,0.99)))
+    session.stimulus_presentations_np['d_prime'] = \
+        Z(np.clip(session.stimulus_presentations_np['hit_rate'],0.01,0.99)) - \
+        Z(np.clip(session.stimulus_presentations_np['false_alarm_rate'],0.01,0.99)) 
+    session.stimulus_presentations_np['criterion'] = \
+        0.5*(Z(np.clip(session.stimulus_presentations_np['hit_rate'],0.01,0.99)) + \
+        Z(np.clip(session.stimulus_presentations_np['false_alarm_rate'],0.01,0.99)))
  
     # Add Reaction Time
-    session.stimulus_presentations['RT'] = \
+    session.stimulus_presentations_np['RT'] = \
         [x[0][0]-x[1] if (len(x[0]) > 0) &x[2] else np.nan \
-        for x in zip(session.stimulus_presentations['licks'], \
-        session.stimulus_presentations['start_time'], \
-        session.stimulus_presentations['bout_start'])]
+        for x in zip(session.stimulus_presentations_np['licks'], \
+        session.stimulus_presentations_np['start_time'], \
+        session.stimulus_presentations_np['bout_start'])]
 
     # Add engagement classification
     reward_threshold = pgt.get_engagement_threshold()
-    session.stimulus_presentations['engaged'] = \
-        [x > reward_threshold for x in session.stimulus_presentations['reward_rate']]
+    session.stimulus_presentations_np['engaged'] = \
+        [x > reward_threshold for x in session.stimulus_presentations_np['reward_rate']]
 
     # QC
-    rewards_sp = session.stimulus_presentations.rewarded.sum()
+    rewards_sp = session.stimulus_presentations_np.rewarded.sum()
     licks_sp = session.licks['num_rewards'].sum()
     rewards = len(session.rewards)
     assert rewards_sp == licks_sp, "mismatch between stimulus rewards and lick rewards"

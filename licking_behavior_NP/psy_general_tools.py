@@ -80,6 +80,8 @@ def get_data(esid):
     # Remove Passive session:
     print('removing passive session stimuli')
     session.stimulus_presentations_np = session.stimulus_presentations.query('active')
+    session.stimulus_presentations_np['omitted'] \
+        = session.stimulus_presentations_np['omitted'].astype(bool)
 
     # Remove receptive field columns
     drop_cols = ['color','contrast','orientation','position_x','position_y',\
