@@ -272,12 +272,13 @@ def annotate_stimulus_presentations_np(session,ignore_trial_errors=False):
     session.stimulus_presentations_np['aborts'] =  \
         session.stimulus_presentations_np['licked'] & \
         ~session.stimulus_presentations_np['is_change']
-    session.stimulus_presentations_np['in_grace_period'] = \
-        (session.stimulus_presentations_np['time_from_last_change'] <= 4.5) & \
-        (session.stimulus_presentations_np['time_from_last_reward'] <=4.5)
+    #session.stimulus_presentations_np['in_grace_period'] = \
+    #    (session.stimulus_presentations_np['time_from_last_change'] <= 4.5) & \
+    #    (session.stimulus_presentations_np['time_from_last_reward'] <=4.5)
     # Remove Aborts that happened during grace period
-    session.stimulus_presentations_np.at[\
-        session.stimulus_presentations_np['in_grace_period'],'aborts'] = False 
+    session.stimulus_presentations_np.loc[\
+        session.stimulus_presentations_np['in_lick_bout'],'aborts'] = False 
+    return
 
     # These ones require iterating the trials table, and is super slow
     session.stimulus_presentations_np['false_alarm'] = False
@@ -393,8 +394,8 @@ def format_session(session,format_options):
         raise Exception('Less than 10 licks in this session')   
 
     # Build Dataframe of images
-    #annotate_stimulus_presentations_np(session,
-    #    ignore_trial_errors = format_options['ignore_trial_errors'])
+    annotate_stimulus_presentations_np(session,
+        ignore_trial_errors = format_options['ignore_trial_errors'])
     #columns = ['start_time','hits','misses','false_alarm','correct_reject',
     #    'aborts','auto_rewards','is_change','omitted','licked','bout_start',
     #    'bout_end','num_bout_start','num_bout_end','in_lick_bout']
@@ -626,7 +627,8 @@ def plot_weights(wMode,weights,psydata,errorbar=None, ypred=None,START=0, END=0,
 
     # initialize 
     weights_list = pgt.get_clean_string(get_weights_list(weights))
-    my_colors = sns.color_palette("hls",len(weights.keys()))
+    #my_colors = sns.color_palette("hls",len(weights.keys()))
+    my_colors = pstyle.get_colors()
     if 'dayLength' in psydata:
         dayLength = np.concatenate([[0],np.cumsum(psydata['dayLength'])])
     else:
@@ -651,13 +653,13 @@ def plot_weights(wMode,weights,psydata,errorbar=None, ypred=None,START=0, END=0,
         
 
     # Axis 0, plot weights
-    for i in np.arange(0, len(weights_list)):
-        ax[0].plot(wMode[i,:], linestyle="-", lw=3, color=my_colors[i],
+    for i,weight in enumerate(weights_list):
+        ax[0].plot(wMode[i,:], linestyle="-", lw=3, color=my_colors[weight],
             label=weights_list[i])        
         ax[0].fill_between(np.arange(len(wMode[i])), wMode[i,:]-2*errorbar[i], 
-            wMode[i,:]+2*errorbar[i],facecolor=my_colors[i], alpha=0.1)    
+            wMode[i,:]+2*errorbar[i],facecolor=my_colors[weight], alpha=0.1)    
         if seedW is not None:
-            ax[0].plot(seedW[i,:], linestyle="--", lw=2, color=my_colors[i], 
+            ax[0].plot(seedW[i,:], linestyle="--", lw=2, color=my_colors[weight], 
                 label= "seed "+weights_list[i])
     ax[0].plot([0,np.shape(wMode)[1]], [0,0], 'k--',alpha=0.2)
     ax[0].set_ylabel('Weight',fontsize=12)
@@ -671,13 +673,13 @@ def plot_weights(wMode,weights,psydata,errorbar=None, ypred=None,START=0, END=0,
             ax[0].text(dayLength[i],ax[0].get_ylim()[1], session_labels[i],rotation=25)
 
     # Axis 1, plot nonlinear weights (approximation)
-    for i in np.arange(0, len(weights_list)):
-        ax[1].plot(transform(wMode[i,:]), linestyle="-", lw=3, color=my_colors[i],
+    for i, weight in enumerate(weights_list):
+        ax[1].plot(transform(wMode[i,:]), linestyle="-", lw=3, color=my_colors[weight],
             label=weights_list[i])
         ax[1].fill_between(np.arange(len(wMode[i])),transform(wMode[i,:]-2*errorbar[i]),
-            transform(wMode[i,:]+2*errorbar[i]),facecolor=my_colors[i], alpha=0.1)                  
+            transform(wMode[i,:]+2*errorbar[i]),facecolor=my_colors[weight], alpha=0.1)             
         if seedW is not None:
-            ax[1].plot(transform(seedW[i,:]), linestyle="--", lw=2, color=my_colors[i],
+            ax[1].plot(transform(seedW[i,:]), linestyle="--", lw=2, color=my_colors[weight],
                 label= "seed "+weights_list[i])
     ax[1].set_ylim(0,1)
     ax[1].set_ylabel('Lick Prob',fontsize=12)

@@ -103,8 +103,11 @@ def get_colors():
         'no strategy':'green',
         'mixed':'green',
         'bias':'dimgray',
+        'licking bias':'dimgray',
         'omissions':'tab:green',
+        'omission':'tab:green',
         'omissions1':'magenta',
+        'post omission':'magenta',
         'task0':'darkorange',
         'timing1D':'blue',
     }
