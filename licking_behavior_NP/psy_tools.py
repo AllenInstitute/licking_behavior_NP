@@ -75,7 +75,7 @@ def process_session(esid,complete=True,version=None,format_options={},refit=Fals
 
     print("Initial Fit")
     strategies={'bias','task0','timing1D','omissions','omissions1'}
-    if np.sum(session.stimulus_presentations.omitted) == 0:
+    if np.sum(session.stimulus_presentations_np.omitted) == 0:
        strategies.remove('omissions')
        strategies.remove('omissions1')
     hyp, evd, wMode, hess, credibleInt,weights = fit_weights(psydata,strategies)
@@ -162,9 +162,9 @@ def build_session_strategy_df(esid, version,TRAIN=False,fit=None,session=None):
         # add checks here to see if it has already been added?
         if 'bout_number' not in session.licks:
             pm.annotate_licks(session)
-        if 'bout_start' not in session.stimulus_presentations:
+        if 'bout_start' not in session.stimulus_presentations_np:
             pm.annotate_bouts(session)
-        if 'reward_rate' not in session.stimulus_presentations:
+        if 'reward_rate' not in session.stimulus_presentations_np:
             pm.annotate_image_rolling_metrics(session)
 
     # Load Model fit
@@ -175,25 +175,25 @@ def build_session_strategy_df(esid, version,TRAIN=False,fit=None,session=None):
     weights = get_weights_list(fit['weights'])
     for wdex, weight in enumerate(weights):
         # Weights are not defined during lick bouts
-        session.stimulus_presentations.at[\
-            ~session.stimulus_presentations['in_lick_bout'], weight] = \
+        session.stimulus_presentations_np.at[\
+            ~session.stimulus_presentations_np['in_lick_bout'], weight] = \
             fit['wMode'][wdex,:]
 
         # Fill in lick bouts with the value from the start of the bout
-        session.stimulus_presentations[weight] = \
-            session.stimulus_presentations[weight].fillna(method='ffill')
+        session.stimulus_presentations_np[weight] = \
+            session.stimulus_presentations_np[weight].fillna(method='ffill')
     
     # Clean up Stimulus Presentations
-    model_output = session.stimulus_presentations.copy()
+    model_output = session.stimulus_presentations_np.copy()
         
-    # Drop columns from pm.annotations, and stimulus_presentations
+    # Drop columns from pm.annotations, and stimulus_presentations_np
     model_output.drop(columns=['duration', 'end_frame', 'image_set','index', 
         'orientation', 'start_frame', 'start_time', 'stop_time', 'licks', 
         'rewards', 'time_from_last_lick', 'time_from_last_reward', 
         'time_from_last_change', 'mean_running_speed', 'num_bout_start', 
         'num_bout_end','hit_bout'],inplace=True,errors='ignore') 
 
-    # Drop columns that come from ps.annotate_stimulus_presentations
+    # Drop columns that come from ps.annotate_stimulus_presentations_np
     model_output.drop(columns=['in_grace_period','correct_reject','misses',
         'auto_rewards','hits','aborts','false_alarm'],inplace=True, errors='ignore')
 
@@ -240,7 +240,7 @@ def build_session_licks_df(session, esid, version):
     session_licks_df.to_csv(filename,index=False) 
 
  
-def annotate_stimulus_presentations(session,ignore_trial_errors=False):
+def annotate_stimulus_presentations_np(session,ignore_trial_errors=False):
     '''
         Adds columns to the stimulus_presentation table describing whether 
         certain task events happened during that image. Importantly! These annotations
@@ -263,51 +263,51 @@ def annotate_stimulus_presentations(session,ignore_trial_errors=False):
         correct_reject, True if the mouse did not lick on a sham-change-image
         auto_rewards,   True if there was an auto-reward during this image
     '''
-    session.stimulus_presentations['hits']   =  \
-        session.stimulus_presentations['licked'] & \
-        session.stimulus_presentations['is_change']
-    session.stimulus_presentations['misses'] = \
-        ~session.stimulus_presentations['licked'] & \
-        session.stimulus_presentations['is_change']
-    session.stimulus_presentations['aborts'] =  \
-        session.stimulus_presentations['licked'] & \
-        ~session.stimulus_presentations['is_change']
-    session.stimulus_presentations['in_grace_period'] = \
-        (session.stimulus_presentations['time_from_last_change'] <= 4.5) & \
-        (session.stimulus_presentations['time_from_last_reward'] <=4.5)
+    session.stimulus_presentations_np['hits']   =  \
+        session.stimulus_presentations_np['licked'] & \
+        session.stimulus_presentations_np['is_change']
+    session.stimulus_presentations_np['misses'] = \
+        ~session.stimulus_presentations_np['licked'] & \
+        session.stimulus_presentations_np['is_change']
+    session.stimulus_presentations_np['aborts'] =  \
+        session.stimulus_presentations_np['licked'] & \
+        ~session.stimulus_presentations_np['is_change']
+    session.stimulus_presentations_np['in_grace_period'] = \
+        (session.stimulus_presentations_np['time_from_last_change'] <= 4.5) & \
+        (session.stimulus_presentations_np['time_from_last_reward'] <=4.5)
     # Remove Aborts that happened during grace period
-    session.stimulus_presentations.at[\
-        session.stimulus_presentations['in_grace_period'],'aborts'] = False 
+    session.stimulus_presentations_np.at[\
+        session.stimulus_presentations_np['in_grace_period'],'aborts'] = False 
 
     # These ones require iterating the trials table, and is super slow
-    session.stimulus_presentations['false_alarm'] = False
-    session.stimulus_presentations['correct_reject'] = False
-    session.stimulus_presentations['auto_rewards'] = False
+    session.stimulus_presentations_np['false_alarm'] = False
+    session.stimulus_presentations_np['correct_reject'] = False
+    session.stimulus_presentations_np['auto_rewards'] = False
     try:
-        for i in session.stimulus_presentations.index:
+        for i in session.stimulus_presentations_np.index:
             found_it=True
             trial = session.trials[
                 (session.trials.start_time <= \
-                session.stimulus_presentations.at[i,'start_time']) & 
+                session.stimulus_presentations_np.at[i,'start_time']) & 
                 (session.trials.stop_time >=\
-                session.stimulus_presentations.at[i,'start_time'] + 0.25)
+                session.stimulus_presentations_np.at[i,'start_time'] + 0.25)
                 ]
             if len(trial) > 1:
                 raise Exception("Could not isolate a trial for this image")
             if len(trial) == 0:
                 trial = session.trials[
                     (session.trials.start_time <= \
-                    session.stimulus_presentations.at[i,'start_time']) & 
+                    session.stimulus_presentations_np.at[i,'start_time']) & 
                     (session.trials.stop_time+0.75 >= \
-                    session.stimulus_presentations.at[i,'start_time'] + 0.25)
+                    session.stimulus_presentations_np.at[i,'start_time'] + 0.25)
                     ]  
                 if ( len(trial) == 0 ) & \
-                    (session.stimulus_presentations.at[i,'start_time'] > \
+                    (session.stimulus_presentations_np.at[i,'start_time'] > \
                     session.trials.start_time.values[-1]):
                     trial = session.trials[\
                         session.trials.index == session.trials.index[-1]]
                 elif ( len(trial) ==0) & \
-                    (session.stimulus_presentations.at[i,'start_time'] < \
+                    (session.stimulus_presentations_np.at[i,'start_time'] < \
                     session.trials.start_time.values[0]):
                     trial = session.trials[session.trials.index == \
                     session.trials.index[0]]
@@ -316,9 +316,9 @@ def annotate_stimulus_presentations(session,ignore_trial_errors=False):
                 elif len(trial) == 0:
                     trial = session.trials[
                         (session.trials.start_time <= \
-                        session.stimulus_presentations.at[i,'start_time']+0.75) & 
+                        session.stimulus_presentations_np.at[i,'start_time']+0.75) & 
                         (session.trials.stop_time+0.75 >= \
-                        session.stimulus_presentations.at[i,'start_time'] + 0.25)
+                        session.stimulus_presentations_np.at[i,'start_time'] + 0.25)
                         ]  
                     if len(trial) == 0: 
                         print('stim index: '+str(i))
@@ -326,22 +326,22 @@ def annotate_stimulus_presentations(session,ignore_trial_errors=False):
             if found_it:
                 if trial['false_alarm'].values[0]:
                     if (trial.change_time.values[0] >= \
-                        session.stimulus_presentations.at[i,'start_time']) & \
+                        session.stimulus_presentations_np.at[i,'start_time']) & \
                         (trial.change_time.values[0] <= \
-                        session.stimulus_presentations.at[i,'stop_time'] ):
-                        session.stimulus_presentations.at[i,'false_alarm'] = True
+                        session.stimulus_presentations_np.at[i,'stop_time'] ):
+                        session.stimulus_presentations_np.at[i,'false_alarm'] = True
                 if trial['correct_reject'].values[0]:
                     if (trial.change_time.values[0] >= \
-                        session.stimulus_presentations.at[i,'start_time']) & \
+                        session.stimulus_presentations_np.at[i,'start_time']) & \
                         (trial.change_time.values[0] <= \
-                        session.stimulus_presentations.at[i,'stop_time'] ):
-                        session.stimulus_presentations.at[i,'correct_reject'] = True
+                        session.stimulus_presentations_np.at[i,'stop_time'] ):
+                        session.stimulus_presentations_np.at[i,'correct_reject'] = True
                 if trial['auto_rewarded'].values[0]:
                     if (trial.change_time.values[0] >= \
-                        session.stimulus_presentations.at[i,'start_time']) & \
+                        session.stimulus_presentations_np.at[i,'start_time']) & \
                         (trial.change_time.values[0] <= \
-                        session.stimulus_presentations.at[i,'stop_time'] ):
-                        session.stimulus_presentations.at[i,'auto_rewards'] = True
+                        session.stimulus_presentations_np.at[i,'stop_time'] ):
+                        session.stimulus_presentations_np.at[i,'auto_rewards'] = True
     except:
         if ignore_trial_errors:
             print('WARNING, had trial alignment errors, '+\
@@ -393,19 +393,23 @@ def format_session(session,format_options):
         raise Exception('Less than 10 licks in this session')   
 
     # Build Dataframe of images
-    annotate_stimulus_presentations(session,
-        ignore_trial_errors = format_options['ignore_trial_errors'])
-    columns = ['start_time','hits','misses','false_alarm','correct_reject',
-        'aborts','auto_rewards','is_change','omitted','licked','bout_start',
+    #annotate_stimulus_presentations_np(session,
+    #    ignore_trial_errors = format_options['ignore_trial_errors'])
+    #columns = ['start_time','hits','misses','false_alarm','correct_reject',
+    #    'aborts','auto_rewards','is_change','omitted','licked','bout_start',
+    #    'bout_end','num_bout_start','num_bout_end','in_lick_bout']
+    columns = ['start_time','hits','misses',
+        'aborts','is_change','omitted','licked','bout_start',
         'bout_end','num_bout_start','num_bout_end','in_lick_bout']
-    df = pd.DataFrame(data = session.stimulus_presentations[columns])
+
+    df = pd.DataFrame(data = session.stimulus_presentations_np[columns])
     df = df.rename(columns={'is_change':'change'})
 
     # Process behavior annotations
     df['y'] = np.array([2 if x else 1 for x in 
-        session.stimulus_presentations.bout_start.values])
-    df['images_since_last_lick'] = session.stimulus_presentations.groupby(\
-        session.stimulus_presentations['bout_end'].cumsum()).cumcount(ascending=True)
+        session.stimulus_presentations_np.bout_start.values])
+    df['images_since_last_lick'] = session.stimulus_presentations_np.groupby(\
+        session.stimulus_presentations_np['bout_end'].cumsum()).cumcount(ascending=True)
     df['timing_input'] = [x+1 for x in df['images_since_last_lick'].shift(fill_value=0)]
     df['included'] = ~df['in_lick_bout']
 
@@ -493,12 +497,12 @@ def format_session(session,format_options):
     # Pack up data into format for psytrack
     psydata = { 'y': df['y'].values, 
                 'inputs':inputDict, 
-                'false_alarms': df['false_alarm'].values,
-                'correct_reject': df['correct_reject'].values,
+                #'false_alarms': df['false_alarm'].values,
+                #'correct_reject': df['correct_reject'].values,
                 'hits': df['hits'].values,
                 'misses':df['misses'].values,
                 'aborts':df['aborts'].values,
-                'auto_rewards':df['auto_rewards'].values,
+                #'auto_rewards':df['auto_rewards'].values,
                 'start_times':df['start_time'].values,
                 'image_ids': df.index.values,
                 'df':df,
@@ -690,18 +694,19 @@ def plot_weights(wMode,weights,psydata,errorbar=None, ypred=None,START=0, END=0,
             if psydata['hits'][i]:
                 ax[2].plot(i, 1+np.random.randn()*jitter, 'bo',alpha=0.2)
             elif psydata['misses'][i]:
-                ax[2].plot(i, 1.5+np.random.randn()*jitter, 'ro',alpha = 0.2)   
-            elif psydata['false_alarms'][i]:
-                ax[2].plot(i, 2.5+np.random.randn()*jitter, 'ko',alpha = 0.2)
-            elif psydata['correct_reject'][i] & (not psydata['aborts'][i]):
-                ax[2].plot(i, 2+np.random.randn()*jitter, 'co',alpha = 0.2)   
+                ax[2].plot(i, 2+np.random.randn()*jitter, 'ro',alpha = 0.2)   
+            #elif psydata['false_alarms'][i]:
+            #    ax[2].plot(i, 2.5+np.random.randn()*jitter, 'ko',alpha = 0.2)
+            #elif psydata['correct_reject'][i] & (not psydata['aborts'][i]):
+            #    ax[2].plot(i, 2+np.random.randn()*jitter, 'co',alpha = 0.2)   
             elif psydata['aborts'][i]:
                 ax[2].plot(i, 3+np.random.randn()*jitter, 'ko',alpha=0.2)  
-            if psydata['auto_rewards'][i] & (not psydata['aborts'][i]):
-                ax[2].plot(i, 3.5+np.random.randn()*jitter, 'go',alpha=0.2)    
-    
-        ax[2].set_yticks([1,1.5,2,2.5,3,3.5])
-        ax[2].set_yticklabels(['hits','miss','CR','FA','abort','auto'],
+            #if psydata['auto_rewards'][i] & (not psydata['aborts'][i]):
+            #    ax[2].plot(i, 3.5+np.random.randn()*jitter, 'go',alpha=0.2)    
+   
+        ax[2].set_ylim([0,4]) 
+        ax[2].set_yticks([1,2,3])
+        ax[2].set_yticklabels(['hits','miss','abort'],
             fontdict={'fontsize':12})
         ax[2].set_xlim(START,END)
         ax[2].set_xlabel('Image #',fontsize=12)
