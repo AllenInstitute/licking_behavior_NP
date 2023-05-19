@@ -2,10 +2,7 @@ import json
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from visual_behavior.data_access import reformat 
-import visual_behavior.data_access.loading as loading
-import visual_behavior.data_access.utilities as utilities
-
+#from visual_behavior.data_access import reformat 
 
 from allensdk.brain_observatory.behavior.behavior_project_cache import \
     VisualBehaviorNeuropixelsProjectCache
@@ -78,33 +75,28 @@ def get_data(esid):
 
     # Get SDK session object
     print('Loading SDK object')
+    cache_dir = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/data/'
+    cache = VisualBehaviorNeuropixelsProjectCache.from_s3_cache(cache_dir=Path(cache_dir))
     session = cache.get_ecephys_session(ecephys_session_id=esid)
 
+    # Remove Passive session:
+    print('removing passive session stimuli')
+    session.stimulus_presentations_np = session.stimulus_presentations.query('active')
 
-    print('Checking for early omission')
-    while session.stimulus_presentations.iloc[0]['omitted'] == True:
-        print('Removing early omission')
-        session.stimulus_presentations.drop(index=[0],inplace=True)
- 
+    # Remove receptive field columns
+    drop_cols = ['color','contrast','orientation','position_x','position_y',\
+        'spatial_frequency','temporal_frequency']
+    session.stimulus_presentations_np.drop(columns=drop_cols,inplace=True)
+
     print('Adding stimulus annotations')
-    if session.metadata['session_type'] in \
-        ["TRAINING_1_gratings","TRAINING_0_gratings_autorewards_15min"]: 
-        raise Exception('Need to update')
-        session = build_pseudo_stimulus_presentations(session)
-        session.stimulus_presentations = training_add_licks_each_image(\
-            session.stimulus_presentations, session.licks)
-        session.stimulus_presentations = training_add_rewards_each_image(\
-            session.stimulus_presentations, session.rewards)
-    else:
-        # Get extended stimulus presentations
-        reformat.add_licks_each_flash(session.stimulus_presentations, session.licks) 
-        reformat.add_rewards_each_flash(session.stimulus_presentations, session.rewards)
-
-    session.stimulus_presentations['licked'] = [True if len(licks) > 0 else False \
-        for licks in session.stimulus_presentations.licks.values]
-    reformat.add_time_from_last_change(session.stimulus_presentations) 
-    reformat.add_time_from_last_lick(session.stimulus_presentations, session.licks)
-    reformat.add_time_from_last_reward(session.stimulus_presentations, session.rewards)
+    # Get extended stimulus presentations
+    reformat.add_licks_each_flash(session.stimulus_presentations_np, session.licks) 
+    reformat.add_rewards_each_flash(session.stimulus_presentations_np, session.rewards)
+    session.stimulus_presentations_np['licked'] = [True if len(licks) > 0 else False \
+        for licks in session.stimulus_presentations_np.licks.values]
+    reformat.add_time_from_last_change(session.stimulus_presentations_np) 
+    reformat.add_time_from_last_lick(session.stimulus_presentations_np, session.licks)
+    reformat.add_time_from_last_reward(session.stimulus_presentations_np, session.rewards)
     return session
 
 def moving_mean(values, window,mode='valid'):
