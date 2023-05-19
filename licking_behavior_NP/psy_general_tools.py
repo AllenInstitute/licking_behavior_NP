@@ -1,14 +1,17 @@
 import json
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from visual_behavior.data_access import reformat 
 import visual_behavior.data_access.loading as loading
 import visual_behavior.data_access.utilities as utilities
-from allensdk.brain_observatory.behavior.behavior_session import BehaviorSession
-from allensdk.brain_observatory.behavior.behavior_ophys_session import \
-    BehaviorOphysSession
+#from allensdk.brain_observatory.behavior.behavior_session import BehaviorSession
+#from allensdk.brain_observatory.behavior.behavior_ophys_session import \
+#    BehaviorOphysSession
+
 from allensdk.brain_observatory.behavior.behavior_project_cache import \
-    VisualBehaviorOphysProjectCache
+    VisualBehaviorNeuropixelsProjectCache
+
 
 '''
 This is a set of general purpose functions for interacting with the SDK
@@ -68,13 +71,17 @@ def get_directory(version,verbose=False,subdirectory=None,group=None):
     return directory
 
 def get_np_session_table():
-    filename = '/allen/programs/mindscope/workgroups/np-behavior/vbn_data_release/metadata_220429/behavior_sessions.csv'
-    np_table= pd.read_csv(filename)
-    np_table['EPHYS_session_type'] = [
-        x.startswith('EPHYS') for x in np_table['session_type']]  
-    np_table['EPHYS_rig'] = [x in ["NP.1", "NP.0"] for x in np_table['equipment_name']]
-    np_table['EPHYS'] = np_table['EPHYS_rig'] & np_table['EPHYS_session_type'] 
-    return np_table
+    
+    print('In development! Tread carefully')
+    cache_dir = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/data/'
+    cache = VisualBehaviorNeuropixelsProjectCache.from_s3_cache(cache_dir=Path(cache_dir))
+    return cache
+    #np_table= pd.read_csv(filename)
+    #np_table['EPHYS_session_type'] = [
+    #    x.startswith('EPHYS') for x in np_table['session_type']]  
+    #np_table['EPHYS_rig'] = [x in ["NP.1", "NP.0"] for x in np_table['equipment_name']]
+    #np_table['EPHYS'] = np_table['EPHYS_rig'] & np_table['EPHYS_session_type'] 
+    #return np_table
 
 def get_ophys_experiment_table():
     '''
