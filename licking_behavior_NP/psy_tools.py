@@ -272,85 +272,6 @@ def annotate_stimulus_presentations_np(session,ignore_trial_errors=False):
     session.stimulus_presentations_np['aborts'] =  \
         session.stimulus_presentations_np['licked'] & \
         ~session.stimulus_presentations_np['is_change']
-    #session.stimulus_presentations_np['in_grace_period'] = \
-    #    (session.stimulus_presentations_np['time_from_last_change'] <= 4.5) & \
-    #    (session.stimulus_presentations_np['time_from_last_reward'] <=4.5)
-    # Remove Aborts that happened during grace period
-    session.stimulus_presentations_np.loc[\
-        session.stimulus_presentations_np['in_lick_bout'],'aborts'] = False 
-    return
-
-    # These ones require iterating the trials table, and is super slow
-    session.stimulus_presentations_np['false_alarm'] = False
-    session.stimulus_presentations_np['correct_reject'] = False
-    session.stimulus_presentations_np['auto_rewards'] = False
-    try:
-        for i in session.stimulus_presentations_np.index:
-            found_it=True
-            trial = session.trials[
-                (session.trials.start_time <= \
-                session.stimulus_presentations_np.at[i,'start_time']) & 
-                (session.trials.stop_time >=\
-                session.stimulus_presentations_np.at[i,'start_time'] + 0.25)
-                ]
-            if len(trial) > 1:
-                raise Exception("Could not isolate a trial for this image")
-            if len(trial) == 0:
-                trial = session.trials[
-                    (session.trials.start_time <= \
-                    session.stimulus_presentations_np.at[i,'start_time']) & 
-                    (session.trials.stop_time+0.75 >= \
-                    session.stimulus_presentations_np.at[i,'start_time'] + 0.25)
-                    ]  
-                if ( len(trial) == 0 ) & \
-                    (session.stimulus_presentations_np.at[i,'start_time'] > \
-                    session.trials.start_time.values[-1]):
-                    trial = session.trials[\
-                        session.trials.index == session.trials.index[-1]]
-                elif ( len(trial) ==0) & \
-                    (session.stimulus_presentations_np.at[i,'start_time'] < \
-                    session.trials.start_time.values[0]):
-                    trial = session.trials[session.trials.index == \
-                    session.trials.index[0]]
-                elif np.sum(session.trials.aborted) == 0:
-                    found_it=False
-                elif len(trial) == 0:
-                    trial = session.trials[
-                        (session.trials.start_time <= \
-                        session.stimulus_presentations_np.at[i,'start_time']+0.75) & 
-                        (session.trials.stop_time+0.75 >= \
-                        session.stimulus_presentations_np.at[i,'start_time'] + 0.25)
-                        ]  
-                    if len(trial) == 0: 
-                        print('stim index: '+str(i))
-                        raise Exception("Could not find a trial for this image")
-            if found_it:
-                if trial['false_alarm'].values[0]:
-                    if (trial.change_time.values[0] >= \
-                        session.stimulus_presentations_np.at[i,'start_time']) & \
-                        (trial.change_time.values[0] <= \
-                        session.stimulus_presentations_np.at[i,'stop_time'] ):
-                        session.stimulus_presentations_np.at[i,'false_alarm'] = True
-                if trial['correct_reject'].values[0]:
-                    if (trial.change_time.values[0] >= \
-                        session.stimulus_presentations_np.at[i,'start_time']) & \
-                        (trial.change_time.values[0] <= \
-                        session.stimulus_presentations_np.at[i,'stop_time'] ):
-                        session.stimulus_presentations_np.at[i,'correct_reject'] = True
-                if trial['auto_rewarded'].values[0]:
-                    if (trial.change_time.values[0] >= \
-                        session.stimulus_presentations_np.at[i,'start_time']) & \
-                        (trial.change_time.values[0] <= \
-                        session.stimulus_presentations_np.at[i,'stop_time'] ):
-                        session.stimulus_presentations_np.at[i,'auto_rewards'] = True
-    except:
-        if ignore_trial_errors:
-            print('WARNING, had trial alignment errors, '+\
-            'but are ignoring due to ignore_trial_errors=True')
-        else:
-            raise Exception('Trial Alignment Error. '+\
-            'Set ignore_trial_errors=True to ignore. Image #: '+str(i))
-
 
 def get_format_options(version, format_options):
     '''
@@ -396,9 +317,6 @@ def format_session(session,format_options):
     # Build Dataframe of images
     annotate_stimulus_presentations_np(session,
         ignore_trial_errors = format_options['ignore_trial_errors'])
-    #columns = ['start_time','hits','misses','false_alarm','correct_reject',
-    #    'aborts','auto_rewards','is_change','omitted','licked','bout_start',
-    #    'bout_end','num_bout_start','num_bout_end','in_lick_bout']
     columns = ['start_time','hits','misses',
         'aborts','is_change','omitted','licked','bout_start',
         'bout_end','num_bout_start','num_bout_end','in_lick_bout']
@@ -498,12 +416,9 @@ def format_session(session,format_options):
     # Pack up data into format for psytrack
     psydata = { 'y': df['y'].values, 
                 'inputs':inputDict, 
-                #'false_alarms': df['false_alarm'].values,
-                #'correct_reject': df['correct_reject'].values,
                 'hits': df['hits'].values,
                 'misses':df['misses'].values,
                 'aborts':df['aborts'].values,
-                #'auto_rewards':df['auto_rewards'].values,
                 'start_times':df['start_time'].values,
                 'image_ids': df.index.values,
                 'df':df,
@@ -627,7 +542,6 @@ def plot_weights(wMode,weights,psydata,errorbar=None, ypred=None,START=0, END=0,
 
     # initialize 
     weights_list = pgt.get_clean_string(get_weights_list(weights))
-    #my_colors = sns.color_palette("hls",len(weights.keys()))
     my_colors = pstyle.get_colors()
     if 'dayLength' in psydata:
         dayLength = np.concatenate([[0],np.cumsum(psydata['dayLength'])])
@@ -697,14 +611,8 @@ def plot_weights(wMode,weights,psydata,errorbar=None, ypred=None,START=0, END=0,
                 ax[2].plot(i, 1+np.random.randn()*jitter, 'bo',alpha=0.2)
             elif psydata['misses'][i]:
                 ax[2].plot(i, 2+np.random.randn()*jitter, 'ro',alpha = 0.2)   
-            #elif psydata['false_alarms'][i]:
-            #    ax[2].plot(i, 2.5+np.random.randn()*jitter, 'ko',alpha = 0.2)
-            #elif psydata['correct_reject'][i] & (not psydata['aborts'][i]):
-            #    ax[2].plot(i, 2+np.random.randn()*jitter, 'co',alpha = 0.2)   
             elif psydata['aborts'][i]:
                 ax[2].plot(i, 3+np.random.randn()*jitter, 'ko',alpha=0.2)  
-            #if psydata['auto_rewards'][i] & (not psydata['aborts'][i]):
-            #    ax[2].plot(i, 3.5+np.random.randn()*jitter, 'go',alpha=0.2)    
    
         ax[2].set_ylim([0,4]) 
         ax[2].set_yticks([1,2,3])
@@ -873,7 +781,6 @@ def summarize_fit(fit, version=None, savefig=False):
     directory = pgt.get_directory(version)
 
     fig,ax = plt.subplots(nrows=2,ncols=2, figsize=(10,7))
-    #my_colors = sns.color_palette("hls",len(fit['weights'].keys()))
     my_colors = pstyle.get_colors()
 
     # Plot average weight
@@ -1081,33 +988,5 @@ def get_session_dropout(fit, cross_validation=False):
             dropout[m] = (1-this_ev/full_ev)*100
     
     return dropout   
-
-
-def plot_task_timing_by_training_duration(model_manifest,version=None, savefig=True,
-    group_label='all'):
-    
-    raise Exception('Need to update')
-    #TODO Issue, #92
-    avg_index = []
-    num_train_sess = []
-    behavior_sessions = pgt.get_training_manifest()
-    behavior_sessions['training'] = behavior_sessions['ophys_session_id'].isnull()
-    for index, mouse in enumerate(pgt.get_mice_ids()):
-        df = behavior_sessions.query('donor_id ==@mouse')
-        num_train_sess.append(len(df.query('training')))
-        avg_index.append(model_manifest.query('donor_id==@mouse').\
-            strategy_dropout_index.mean())
-
-    plt.figure()
-    plt.plot(avg_index, num_train_sess,'ko')
-    plt.ylabel('Number of Training Sessions')
-    plt.xlabel('Strategy Index')
-    plt.axvline(0,ls='--',color='k')
-    plt.axhline(0,ls='--',color='k')
-
-    if savefig:
-        directory=pgt.get_directory(version)
-        plt.savefig(directory+'figures_summary/'+group_label+\
-            "_task_index_by_train_duration.png")
 
 
