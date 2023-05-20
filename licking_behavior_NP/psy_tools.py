@@ -873,7 +873,8 @@ def summarize_fit(fit, version=None, savefig=False):
     directory = pgt.get_directory(version)
 
     fig,ax = plt.subplots(nrows=2,ncols=2, figsize=(10,7))
-    my_colors = sns.color_palette("hls",len(fit['weights'].keys()))
+    #my_colors = sns.color_palette("hls",len(fit['weights'].keys()))
+    my_colors = pstyle.get_colors()
 
     # Plot average weight
     means = np.mean(fit['wMode'],1)
@@ -882,9 +883,9 @@ def summarize_fit(fit, version=None, savefig=False):
     for i in np.arange(0,len(means)):
         if np.mod(i,2) == 0:
             ax[0,0].axvspan(i-.5,i+.5,color='k', alpha=0.1)
-    for i in range(0,len(means)):
-        ax[0,0].plot(i,means[i],'o',color=my_colors[i],label=weights_list[i])
-        ax[0,0].plot([i,i],[means[i]-stds[i],means[i]+stds[i]],'-',color=my_colors[i])
+    for i,weight in enumerate(weights_list):
+        ax[0,0].plot(i,means[i],'o',color=my_colors[weight],label=weights_list[i])
+        ax[0,0].plot([i,i],[means[i]-stds[i],means[i]+stds[i]],'-',color=my_colors[weight])
     ax[0,0].set_ylabel('Average Weight')
     ax[0,0].set_xlabel('Strategy')
     ax[0,0].axhline(0,linestyle='--',color='k',alpha=0.5)
@@ -892,15 +893,15 @@ def summarize_fit(fit, version=None, savefig=False):
     ax[0,0].set_xticks(np.arange(0,len(means)))
 
     # Plot smoothing prior
-    for i in np.arange(0,len(means)):
+    for i,weight in enumerate(weights_list):
         if np.mod(i,2) == 0:
             ax[0,1].axvspan(i-.5,i+.5,color='k', alpha=0.1)
     ax[0,1].axhline(0,linestyle='-',color='k',    alpha=0.3)
     ax[0,1].axhline(0.1,linestyle='-',color='k',  alpha=0.3)
     ax[0,1].axhline(0.01,linestyle='-',color='k', alpha=0.3)
     ax[0,1].axhline(0.001,linestyle='-',color='k',alpha=0.3)
-    for i in range(0,len(means)):
-        ax[0,1].plot(i,fit['hyp']['sigma'][i],'o',color=my_colors[i],\
+    for i,weight in enumerate(weights_list):
+        ax[0,1].plot(i,fit['hyp']['sigma'][i],'o',color=my_colors[weight],\
             label=weights_list[i])
     ax[0,1].set_ylabel('Smoothing Prior, $\sigma$ \n <-- More Smooth'+\
         '      More Variable -->')
@@ -911,26 +912,28 @@ def summarize_fit(fit, version=None, savefig=False):
     ax[0,1].set_xticks(np.arange(0,len(means)))
 
     # plot dropout
-    dropout_dict = get_session_dropout(fit)
-    dropout = [dropout_dict[x] for x in sorted(list(fit['weights'].keys()))] 
-    for i in np.arange(0,len(dropout)):
-        if np.mod(i,2) == 0:
-            ax[1,0].axvspan(i-.5,i+.5,color='k', alpha=0.1)
-        ax[1,0].plot(i,dropout[i],'o',color=my_colors[i])       
+    if 'models' in fit:
+        dropout_dict = get_session_dropout(fit)
+        dropout = [dropout_dict[x] for x in sorted(list(fit['weights'].keys()))] 
+        for i in np.arange(0,len(dropout)):
+            if np.mod(i,2) == 0:
+                ax[1,0].axvspan(i-.5,i+.5,color='k', alpha=0.1)
+            ax[1,0].plot(i,dropout[i],'o',color=my_colors[i])       
+        ax[1,0].set_xticks(np.arange(0,len(dropout)))
+        labels = sorted(list(fit['weights'].keys())) 
+        ax[1,0].set_xticklabels(weights_list,rotation=90)
     ax[1,0].axhline(0,linestyle='--',color='k',    alpha=0.3)
     ax[1,0].set_ylabel('Dropout')
     ax[1,0].set_xlabel('Model Component')
     ax[1,0].tick_params(axis='both',labelsize=10)
-    ax[1,0].set_xticks(np.arange(0,len(dropout)))
-    labels = sorted(list(fit['weights'].keys())) 
-    ax[1,0].set_xticklabels(weights_list,rotation=90)
+
     
     # Plot roc
     for spine in ax[1,1].spines.values():
         spine.set_visible(False)
     ax[1,1].set_yticks([])
     ax[1,1].set_xticks([])
-    roc_cv    = compute_model_roc(fit,cross_validation=True)
+
     roc_train = compute_model_roc(fit,cross_validation=False)
     fs= 12
     starty = 0.5
@@ -949,7 +952,9 @@ def summarize_fit(fit, version=None, savefig=False):
     fig.text(.7,starty-offset*3,str(round(roc_train,2)),fontsize=fs)
 
     fig.text(.7,starty-offset*4,"ROC CV:  "    ,fontsize=fs,horizontalalignment='right')
-    fig.text(.7,starty-offset*4,str(round(roc_cv,2)),fontsize=fs)
+    if 'cv_pred' in fit:
+        roc_cv    = compute_model_roc(fit,cross_validation=True)
+        fig.text(.7,starty-offset*4,str(round(roc_cv,2)),fontsize=fs)
 
     fig.text(.7,starty-offset*5,"Lick Fraction:  ",fontsize=fs,\
         horizontalalignment='right')
@@ -968,9 +973,11 @@ def summarize_fit(fit, version=None, savefig=False):
         /fit['psydata']['full_df']['change'].sum()
     fig.text(.7,starty-offset*7,str(round(trial_hit_fraction,3)),fontsize=fs)
 
+
     fig.text(.7,starty-offset*8,"Dropout Task/Timing Index:  " ,fontsize=fs,\
         horizontalalignment='right')
-    fig.text(.7,starty-offset*8,str(round(get_timing_index_fit(fit)[0],2)),fontsize=fs) 
+    if 'models' in fit:
+        fig.text(.7,starty-offset*8,str(round(get_timing_index_fit(fit)[0],2)),fontsize=fs) 
 
     fig.text(.7,starty-offset*9,"Weight Task/Timing Index:  " ,fontsize=fs,\
         horizontalalignment='right')
