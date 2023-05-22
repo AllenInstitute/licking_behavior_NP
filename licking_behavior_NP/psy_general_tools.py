@@ -73,7 +73,8 @@ def get_data(esid):
 
     # Get SDK session object
     print('Loading SDK object')
-    cache_dir = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/data/'
+    #cache_dir = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/data/'
+    cache_dir = '/allen/programs/mindscope/workgroups/np-behavior/vbn_data_release/vbn_s3_cache/'
     cache = VisualBehaviorNeuropixelsProjectCache.from_s3_cache(cache_dir=Path(cache_dir))
     session = cache.get_ecephys_session(ecephys_session_id=esid)
 
