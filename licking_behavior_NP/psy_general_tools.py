@@ -65,10 +65,10 @@ def load_version_parameters(VERSION):
         format_options = json.load(json_file)
     return format_options
 
-def get_data(esid):
+def get_data(bsid):
     '''
         Loads data from SDK interface
-        ARGS: ecephys_session_id to load
+        ARGS: behavior_session_id to load
     '''
 
     # Get SDK session object
@@ -76,7 +76,7 @@ def get_data(esid):
     cache_dir = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/data/'
     #cache_dir = '/allen/programs/mindscope/workgroups/np-behavior/vbn_data_release/vbn_s3_cache/'
     cache = VisualBehaviorNeuropixelsProjectCache.from_s3_cache(cache_dir=Path(cache_dir))
-    session = cache.get_ecephys_session(ecephys_session_id=esid)
+    session = cache.get_behavior_session(behavior_session_id=bsid)
 
     # Remove Passive session:
     print('removing passive session stimuli')

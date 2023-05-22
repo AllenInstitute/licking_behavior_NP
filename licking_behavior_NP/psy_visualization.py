@@ -766,9 +766,9 @@ def plot_session_summary_roc(summary_df,version=None,savefig=False,group=None,
     worst = summary_df['session_roc'].idxmin()
     print("ROC Summary:")
     print('Avg ROC Score : ' +str(np.round(meanscore,3)))
-    print('Worst Session : ' + str(summary_df['ecephys_session_id'].loc[worst]) + 
+    print('Worst Session : ' + str(summary_df['behavior_session_id'].loc[worst]) + 
         " " + str(np.round(summary_df['session_roc'].loc[worst],3)))
-    print('Best Session  : ' + str(summary_df['ecephys_session_id'].loc[best]) + 
+    print('Best Session  : ' + str(summary_df['behavior_session_id'].loc[best]) + 
         " " + str(np.round(summary_df['session_roc'].loc[best],3)))
 
 
@@ -870,14 +870,14 @@ def get_all_static_roc(summary_df, version):
         returns the summary_df with an added column "static_session_roc".
             values are the static au.ROC, or NaN 
     '''
-    summary_df = summary_df.set_index('ecephys_session_id')
-    for index, esid in enumerate(tqdm(summary_df.index.values)):
+    summary_df = summary_df.set_index('behavior_session_id')
+    for index, bsid in enumerate(tqdm(summary_df.index.values)):
         try:
-            fit = ps.load_fit(esid, version=version)
+            fit = ps.load_fit(bsid, version=version)
             static = get_static_roc(fit)
-            summary_df.at[esid,'static_session_roc'] = static
+            summary_df.at[bsid,'static_session_roc'] = static
         except:
-            summary_df.at[esid,'static_session_roc'] = np.nan
+            summary_df.at[bsid,'static_session_roc'] = np.nan
 
     summary_df = summary_df.reset_index()
     return summary_df
@@ -2505,7 +2505,7 @@ def add_fit_prediction(session,version,smoothing_size=50):
         pm.annotate_image_rolling_metrics(session)
 
     # Get full model prediction and target
-    fit = ps.load_fit(session.metadata['ecephys_session_id'], version)
+    fit = ps.load_fit(session.metadata['behavior_session_id'], version)
     prediction = fit['ypred']
     target = fit['psydata']['y']-1
 
@@ -2530,7 +2530,7 @@ def plot_session_engagement(session,version, savefig=False):
 
     if savefig:
         directory = pgt.get_directory(version, subdirectory ='session_figures')
-        filename = directory +str(ecephys_session_id)+'_engagement.png'
+        filename = directory +str(behavior_session_id)+'_engagement.png'
         print('Figure saved to: '+filename)
         plt.savefig(filename)   
 
@@ -2542,7 +2542,7 @@ def plot_image_pair_repetitions(change_df, version,savefig=False, group=None,
         images is repeated in a single session 
     '''
     # get unique pair repeats per session
-    counts = change_df.groupby(['ecephys_session_id','post_change_image',\
+    counts = change_df.groupby(['behavior_session_id','post_change_image',\
         'pre_change_image']).size().values
 
     # make figure    
@@ -2768,8 +2768,8 @@ def plot_chronometric(bouts_df,version,savefig=False, group=None,xmax=8,
     # Save Figure
     if savefig:
         directory = pgt.get_directory(version, subdirectory='figures',group=group)
-        if len(bouts_df['ecephys_session_id'].unique()) == 1:
-            extra = '_'+str(bouts_df.loc[0]['ecephys_session_id'])
+        if len(bouts_df['behavior_session_id'].unique()) == 1:
+            extra = '_'+str(bouts_df.loc[0]['behavior_session_id'])
         else:
             extra =''
         if method =='chronometric':
@@ -3211,7 +3211,7 @@ def plot_session_diagram(session,x=None,xStep=5,version=None):
         pm.annotate_image_rolling_metrics(session)
 
     # Get fit
-    fit = ps.load_fit(session.metadata['ecephys_session_id'],version)
+    fit = ps.load_fit(session.metadata['behavior_session_id'],version)
 
     # Set up figure
     fig,ax  = plt.subplots()  
@@ -3405,8 +3405,8 @@ def plot_session_weights_example(session,version=None):
     if 'reward_rate' not in session.stimulus_presentations_np:
         pm.annotate_image_rolling_metrics(session)
 
-    esid = session.metadata['ecephys_session_id']
-    session_df = ps.load_session_strategy_df(esid, version)
+    bsid = session.metadata['behavior_session_id']
+    session_df = ps.load_session_strategy_df(bsid, version)
 
     # Set up Figure with two axes
     width=12 
@@ -3567,8 +3567,8 @@ def plot_raw_traces(session, x=None, version=None, savefig=False,top=False):
 
     if savefig:
         directory = pgt.get_directory(version, subdirectory ='figures')
-        esid = str(session.metadata['ecephys_session_id'])
-        filename = directory +"example_raw_traces_"+esid+"_.svg"
+        bsid = str(session.metadata['behavior_session_id'])
+        filename = directory +"example_raw_traces_"+bsid+"_.svg"
         print('Figure saved to: '+filename)
         plt.savefig(filename)          
 

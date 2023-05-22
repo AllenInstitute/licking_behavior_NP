@@ -54,22 +54,22 @@ def get_model_inventory(version,include_4x2=False):
     fit_directory=pgt.get_directory(version_num,subdirectory='fits')
     df_directory=pgt.get_directory(version_num,subdirectory='strategy_df') 
     for index, row in manifest.iterrows():
-        fit_filename = fit_directory + str(row.ecephys_session_id) + ".pkl"         
+        fit_filename = fit_directory + str(row.behavior_session_id) + ".pkl"         
         manifest.at[index, 'behavior_fit_available'] = os.path.exists(fit_filename)
 
-        summary_filename = df_directory+ str(row.ecephys_session_id)+'.csv'
+        summary_filename = df_directory+ str(row.behavior_session_id)+'.csv'
         manifest.at[index, 'strategy_df_available'] = os.path.exists(summary_filename)
 
     # Summarize inventory for this model version
     inventory = {}    
     inventory['fit_sessions'] = \
-        manifest.query('behavior_fit_available == True')['ecephys_session_id']
+        manifest.query('behavior_fit_available == True')['behavior_session_id']
     inventory['missing_sessions'] = \
-        manifest.query('behavior_fit_available != True')['ecephys_session_id']
+        manifest.query('behavior_fit_available != True')['behavior_session_id']
     inventory['with_strategy_df'] = \
-        manifest.query('strategy_df_available == True')['ecephys_session_id']
+        manifest.query('strategy_df_available == True')['behavior_session_id']
     inventory['without_strategy_df'] = \
-        manifest.query('strategy_df_available != True')['ecephys_session_id']
+        manifest.query('strategy_df_available != True')['behavior_session_id']
     inventory['num_sessions'] = len(manifest)
     inventory['num_fit'] = len(inventory['fit_sessions'])
     inventory['num_missing'] = len(inventory['missing_sessions'])
@@ -187,7 +187,7 @@ def build_core_table(version,include_4x2=False):
     summary_df['behavior_fit_available'] = summary_df['trained_A'] #copying column size
     for index, row in tqdm(summary_df.iterrows(),total=summary_df.shape[0]):
         try:
-            fit = ps.load_fit(row.ecephys_session_id,version=version)
+            fit = ps.load_fit(row.behavior_session_id,version=version)
         except:
             summary_df.at[index,'behavior_fit_available'] = False
         else:
@@ -295,7 +295,7 @@ def add_time_aligned_session_info(summary_df,version):
     for index, row in tqdm(summary_df.iterrows(),total=summary_df.shape[0]):
         try:
             strategy_dir = pgt.get_directory(version, subdirectory='strategy_df')
-            session_df = pd.read_csv(strategy_dir+str(row.ecephys_session_id)+'.csv')
+            session_df = pd.read_csv(strategy_dir+str(row.behavior_session_id)+'.csv')
             if version <=20:
                 session_df = session_df_backwards_compatability(session_df)
         except Exception as e:
@@ -419,7 +419,7 @@ def build_strategy_matched_subset(summary_df,bin_width=5,bin_range=[-50,50]):
 
     # Count how many sessions are in each bin from each cre line
     counts = summary_df.groupby(['strategy_bins','cre_line']).count()\
-        .unstack(fill_value=0).stack()['ecephys_session_id']
+        .unstack(fill_value=0).stack()['behavior_session_id']
 
     # Iterate over bins, sample the minimum number of sessions
     # across the cre lines
@@ -451,7 +451,7 @@ def build_change_table(summary_df, version):
     ''' 
         Builds a table of all image changes in the dataset
         
-        Loads the session_df for each ecephys_session_id in summary_df
+        Loads the session_df for each behavior_session_id in summary_df
         Saves the change table as "_change_table.pkl"            
     '''
     # Build a dataframe for each session
@@ -461,9 +461,9 @@ def build_change_table(summary_df, version):
     for index, row in tqdm(summary_df.iterrows(),total=summary_df.shape[0]):
         try:
             strategy_dir = pgt.get_directory(version, subdirectory='strategy_df')
-            session_df = pd.read_csv(strategy_dir+str(row.ecephys_session_id)+'.csv')
+            session_df = pd.read_csv(strategy_dir+str(row.behavior_session_id)+'.csv')
             df = session_df.query('is_change').reset_index(drop=True)
-            df['ecephys_session_id'] = row.ecephys_session_id
+            df['behavior_session_id'] = row.behavior_session_id
             df = df.rename(columns={'image_index':'post_change_image'})
             df['pre_change_image'] = df['post_change_image'].shift(1)
             df['image_repeats'] = df['stimulus_presentations_id'].diff()
@@ -471,7 +471,7 @@ def build_change_table(summary_df, version):
                                   'omitted','is_change','change'],errors='ignore')
             dfs.append(df)
         except Exception as e:
-            crashed.append(row.ecephys_session_id)
+            crashed.append(row.behavior_session_id)
 
     # If any sessions crashed, print warning
     if len(crashed) > 0:
@@ -499,7 +499,7 @@ def build_licks_table(summary_df, version):
     ''' 
         Builds a table of all image licks in the dataset
         
-        Loads the session_df for each ecephys_session_id in summary_df
+        Loads the session_df for each behavior_session_id in summary_df
         Saves the licks table as "_licks_table.pkl"            
     '''
     # Build a dataframe for each session
@@ -510,14 +510,14 @@ def build_licks_table(summary_df, version):
     for index, row in tqdm(summary_df.iterrows(),total=summary_df.shape[0]):
         try:
             strategy_dir = pgt.get_directory(version, subdirectory='licks_df')
-            df = pd.read_csv(strategy_dir+str(row.ecephys_session_id)+'.csv')
+            df = pd.read_csv(strategy_dir+str(row.behavior_session_id)+'.csv')
         except Exception as e:
             crash +=1
-            crashed.append(row.ecephys_session_id)
+            crashed.append(row.behavior_session_id)
         else:
             df.reset_index(drop=True)
             df = df.drop(columns=['frame'])
-            df['ecephys_session_id'] = row.ecephys_session_id
+            df['behavior_session_id'] = row.behavior_session_id
             dfs.append(df)
 
     # If any sessions crashed, print warning
@@ -549,7 +549,7 @@ def build_bout_table(licks_df):
         Generates a bouts dataframe from a lick dataframe
         Operates on either a session licks_df or summary licks_df
     
-        ecephys_session_id (int)
+        behavior_session_id (int)
         bout_number (int) ordinal count within each session
         bout_length (int) number of licks in bout
         bout_duration (float) duration of bout in seconds
@@ -566,24 +566,24 @@ def build_bout_table(licks_df):
     '''
 
     # Groups licks into bouts
-    bout_df = licks_df.groupby(['ecephys_session_id',
+    bout_df = licks_df.groupby(['behavior_session_id',
         'bout_number']).apply(len).to_frame().rename(columns={0:"bout_length"})
     
     # count length of bouts
-    bout_df['bout_duration'] = licks_df.groupby(['ecephys_session_id',
+    bout_df['bout_duration'] = licks_df.groupby(['behavior_session_id',
         'bout_number']).last()['timestamps'] \
-        - licks_df.groupby(['ecephys_session_id','bout_number']).first()['timestamps']
+        - licks_df.groupby(['behavior_session_id','bout_number']).first()['timestamps']
     
     # Annotate rewarded bouts
-    bout_df['bout_rewarded'] = licks_df.groupby(['ecephys_session_id',
+    bout_df['bout_rewarded'] = licks_df.groupby(['behavior_session_id',
         'bout_number']).any('rewarded')['bout_rewarded']
-    bout_df['bout_num_rewards'] = licks_df.groupby(['ecephys_session_id',
+    bout_df['bout_num_rewards'] = licks_df.groupby(['behavior_session_id',
         'bout_number']).nth(0)['bout_num_rewards']
    
     # Compute inter-bout-intervals
-    bout_df['pre_ibi'] = licks_df.groupby(['ecephys_session_id',
+    bout_df['pre_ibi'] = licks_df.groupby(['behavior_session_id',
         'bout_number']).nth(0)['pre_ili']
-    bout_df['post_ibi'] = licks_df.groupby(['ecephys_session_id',
+    bout_df['post_ibi'] = licks_df.groupby(['behavior_session_id',
         'bout_number']).nth(-1)['post_ili']
     bout_df['pre_ibi_from_start'] = bout_df['pre_ibi'] \
         + bout_df['bout_duration'].shift(1)
@@ -603,7 +603,7 @@ def build_bout_table(licks_df):
 
     # Check last bout of every session has NaN post_ibi
     unique_last_bout_post_ibi = \
-        bout_df.groupby(['ecephys_session_id']).nth(-1)['post_ibi'].unique()
+        bout_df.groupby(['behavior_session_id']).nth(-1)['post_ibi'].unique()
     assert len(unique_last_bout_post_ibi) == 1, \
         "post_ibi for the last bout should always be NaN"
     assert np.isnan(unique_last_bout_post_ibi[0]), \
@@ -611,7 +611,7 @@ def build_bout_table(licks_df):
 
     # Check first bout of every session has NaN pre_ibi
     unique_first_bout_pre_ibi = \
-        bout_df.groupby(['ecephys_session_id']).nth(0)['pre_ibi'].unique()
+        bout_df.groupby(['behavior_session_id']).nth(0)['pre_ibi'].unique()
     assert len(unique_first_bout_pre_ibi) == 1, \
         "pre_ibi for the first bout should always be NaN"
     assert np.isnan(unique_first_bout_pre_ibi[0]), \
@@ -619,7 +619,7 @@ def build_bout_table(licks_df):
 
     # Check first bout of every session is not post_reward
     unique_first_bout_post_reward = \
-        bout_df.groupby(['ecephys_session_id']).nth(0)['post_reward'].unique()
+        bout_df.groupby(['behavior_session_id']).nth(0)['post_reward'].unique()
     assert len(unique_first_bout_post_reward) == 1, \
         "post_reward for the first bout should always be False"
     assert not unique_first_bout_post_reward[0], \
@@ -638,7 +638,7 @@ def build_comparison_df(df1,df2, version1,version2):
         df1,
         df2,
         how='inner',
-        on='ecephys_session_id',
+        on='behavior_session_id',
         suffixes=('_'+version1,'_'+version2),
         validate='1:1'
         )

@@ -36,24 +36,24 @@ def save(filepath, variables):
     file_temp.close()
 
    
-def process_session(esid,complete=True,version=None,format_options={},refit=False):
+def process_session(bsid,complete=True,version=None,format_options={},refit=False):
     '''
         Fits the model, dropout analysis, and cross validation
-        esid, ecephys_session_id
+        bsid, behavior_session_id
         complete, if True, does a dropout analysis 
         version, the version of the model, where to save the results. Defaults to "dev"
         format_options, a dictionary of options 
     '''
     
-    # Process directory, filename, and esid
-    if type(esid) is str:
-        esid = int(esid)
+    # Process directory, filename, and bsid
+    if type(bsid) is str:
+        bsid = int(bsid)
     if type(version) is str:
         version = int(version)
     directory = pgt.get_directory(version, verbose=True,subdirectory='fits')
-    filename = directory + str(esid)
+    filename = directory + str(bsid)
     fig_dir = pgt.get_directory(version, subdirectory='session_figures')
-    fig_filename = fig_dir +str(esid)
+    fig_filename = fig_dir +str(bsid)
     print(filename) 
 
     # Check if this fit has already completed
@@ -63,7 +63,7 @@ def process_session(esid,complete=True,version=None,format_options={},refit=Fals
 
     print('Starting Fit now')
     print("Pulling Data")
-    session = pgt.get_data(esid)
+    session = pgt.get_data(bsid)
 
     print("Annotating lick bouts")
     pm.annotate_licks(session) 
@@ -102,7 +102,7 @@ def process_session(esid,complete=True,version=None,format_options={},refit=Fals
     labels = ['hyp', 'evd', 'wMode', 'hess', 'credibleInt', 'weights', 'ypred',
         'psydata','cross_results','cv_pred','metadata']       
     fit = dict((x,y) for x,y in zip(labels, output))
-    fit['ID'] = esid
+    fit['ID'] = bsid
 
     if complete:
         fit['models'] = models
@@ -113,15 +113,15 @@ def process_session(esid,complete=True,version=None,format_options={},refit=Fals
     plt.close('all')
 
     print('Saving strategy df')
-    build_session_strategy_df(esid, version,fit=fit,session=session)
+    build_session_strategy_df(bsid, version,fit=fit,session=session)
 
     print('Saving licks df')
-    build_session_licks_df(session, esid, version)
+    build_session_licks_df(session, bsid, version)
 
     print('Done!')
 
 
-def build_session_strategy_df(esid, version,TRAIN=False,fit=None,session=None):
+def build_session_strategy_df(bsid, version,TRAIN=False,fit=None,session=None):
     '''
         Saves an analysis file in <output_dir> for the model fit of session <id> 
         Extends model weights to be constant during licking bouts
@@ -156,7 +156,7 @@ def build_session_strategy_df(esid, version,TRAIN=False,fit=None,session=None):
     '''
     # Get Stimulus Info, append model free metrics
     if session is None:
-        session = pgt.get_data(esid)
+        session = pgt.get_data(bsid)
         pm.get_metrics(session)
     else:
         # add checks here to see if it has already been added?
@@ -169,7 +169,7 @@ def build_session_strategy_df(esid, version,TRAIN=False,fit=None,session=None):
 
     # Load Model fit
     if fit is None:
-        fit = load_fit(esid, version=version)
+        fit = load_fit(bsid, version=version)
  
     # include model weights
     weights = get_weights_list(fit['weights'])
@@ -210,10 +210,10 @@ def build_session_strategy_df(esid, version,TRAIN=False,fit=None,session=None):
 
     # Save out dataframe
     model_output.to_csv(pgt.get_directory(version, \
-        subdirectory='strategy_df')+str(esid)+'.csv') 
+        subdirectory='strategy_df')+str(bsid)+'.csv') 
 
 
-def build_session_licks_df(session, esid, version):
+def build_session_licks_df(session, bsid, version):
     '''
         Saves a dataframe of the lick times for this session
     
@@ -225,7 +225,7 @@ def build_session_licks_df(session, esid, version):
         bout_end (bool) whether this lick was the end of a licking bout
         bout_number (bool) oridinal numbering of bouts in this session
         bout_rewarded (bool) whether this licking bout was rewarded
-        ecephys_session_id (int64) 
+        behavior_session_id (int64) 
     '''
 
     # Annotate licks if missing
@@ -236,7 +236,7 @@ def build_session_licks_df(session, esid, version):
     session_licks_df = session.licks
 
     # Save out dataframe
-    filename = pgt.get_directory(version, subdirectory='licks_df')+str(esid)+'.csv'
+    filename = pgt.get_directory(version, subdirectory='licks_df')+str(bsid)+'.csv'
     session_licks_df.to_csv(filename,index=False) 
 
  
@@ -743,13 +743,13 @@ def compute_model_roc(fit,plot_this=False,cross_validation=True):
         plt.xlabel('False Alarms')
     return metrics.roc_auc_score(data,model)
 
-def load_fit(esid, version=None):
+def load_fit(bsid, version=None):
     '''
-        Loads the fit for session esid, in directory
+        Loads the fit for session bsid, in directory
         Creates a dictionary for the session
     '''
     directory = pgt.get_directory(version,subdirectory='fits')
-    filename = directory + str(esid) + ".pkl" 
+    filename = directory + str(bsid) + ".pkl" 
     output = load(filename)
     if type(output) is not dict:
         labels = ['models', 'labels', 'boots', 'hyp', 'evd', 'wMode', 'hess', \
@@ -758,22 +758,22 @@ def load_fit(esid, version=None):
         fit = dict((x,y) for x,y in zip(labels, output))
     else:
         fit = output
-    fit['esid'] = esid
+    fit['bsid'] = bsid
     return fit
 
 
-def load_session_strategy_df(esid, version, TRAIN=False):
+def load_session_strategy_df(bsid, version, TRAIN=False):
     if TRAIN:
         raise Exception('need to implement')
     else:
         return pd.read_csv(pgt.get_directory(version, subdirectory='strategy_df')+\
-            str(esid)+'.csv') 
+            str(bsid)+'.csv') 
 
 
-def load_session_licks_df(esid, version):
+def load_session_licks_df(bsid, version):
     licks=pd.read_csv(pgt.get_directory(version,subdirectory='licks_df')+\
-        str(esid)+'.csv')
-    licks['ecephys_session_id'] = esid
+        str(bsid)+'.csv')
+    licks['behavior_session_id'] = bsid
     return licks
 
 
