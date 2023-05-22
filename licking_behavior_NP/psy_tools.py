@@ -109,7 +109,7 @@ def process_session(esid,complete=True,version=None,format_options={},refit=Fals
 
     print('Saving fit dictionary')
     save(filename+".pkl", fit) 
-    summarize_fit(fit, version=20, savefig=True)
+    summarize_fit(fit, version=version, savefig=True)
     plt.close('all')
 
     print('Saving strategy df')
@@ -821,11 +821,12 @@ def summarize_fit(fit, version=None, savefig=False):
     # plot dropout
     if 'models' in fit:
         dropout_dict = get_session_dropout(fit)
-        dropout = [dropout_dict[x] for x in sorted(list(fit['weights'].keys()))] 
-        for i in np.arange(0,len(dropout)):
+        dropouts = sorted(list(fit['weights'].keys()))
+        dropout = [dropout_dict[x] for x in dropouts] 
+        for i,d in enumerate(dropouts):
             if np.mod(i,2) == 0:
                 ax[1,0].axvspan(i-.5,i+.5,color='k', alpha=0.1)
-            ax[1,0].plot(i,dropout[i],'o',color=my_colors[i])       
+            ax[1,0].plot(i,dropout[i],'o',color=my_colors[d])       
         ax[1,0].set_xticks(np.arange(0,len(dropout)))
         labels = sorted(list(fit['weights'].keys())) 
         ax[1,0].set_xticklabels(weights_list,rotation=90)
