@@ -32,8 +32,8 @@ def generate_omission(time):
             time = time - .75
     return False
 
-def build_session_interval_df(bsid,version):
-    session = pgt.get_data(bsid)
+def build_session_interval_df(esid,version):
+    session = pgt.get_data(esid)
     pm.get_metrics(session)
 
     df = session.stimulus_presentations
@@ -44,7 +44,7 @@ def build_session_interval_df(bsid,version):
 
     print('saving')
     df.to_csv(pgt.get_directory(version, \
-        subdirectory='interval_df')+str(bsid)+'.csv') 
+        subdirectory='interval_df')+str(esid)+'.csv') 
 
 def compute_interval_duration(df):
     

@@ -18,8 +18,8 @@ def build_timing_schematic(session=None, version=None, savefig=False):
     
     '''
     if session is None:
-        bsid = 951520319
-        session = pgt.get_data(bsid)
+        esid = 951520319
+        session = pgt.get_data(esid)
 
     # Annotate licks and bouts if not already done
     if 'bout_number' not in session.licks:

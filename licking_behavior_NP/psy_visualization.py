@@ -871,13 +871,13 @@ def get_all_static_roc(summary_df, version):
             values are the static au.ROC, or NaN 
     '''
     summary_df = summary_df.set_index('ecephys_session_id')
-    for index, bsid in enumerate(tqdm(summary_df.index.values)):
+    for index, esid in enumerate(tqdm(summary_df.index.values)):
         try:
-            fit = ps.load_fit(bsid, version=version)
+            fit = ps.load_fit(esid, version=version)
             static = get_static_roc(fit)
-            summary_df.at[bsid,'static_session_roc'] = static
+            summary_df.at[esid,'static_session_roc'] = static
         except:
-            summary_df.at[bsid,'static_session_roc'] = np.nan
+            summary_df.at[esid,'static_session_roc'] = np.nan
 
     summary_df = summary_df.reset_index()
     return summary_df
@@ -3405,8 +3405,8 @@ def plot_session_weights_example(session,version=None):
     if 'reward_rate' not in session.stimulus_presentations:
         pm.annotate_image_rolling_metrics(session)
 
-    bsid = session.metadata['ecephys_session_id']
-    session_df = ps.load_session_strategy_df(bsid, version)
+    esid = session.metadata['ecephys_session_id']
+    session_df = ps.load_session_strategy_df(esid, version)
 
     # Set up Figure with two axes
     width=12 
@@ -3567,8 +3567,8 @@ def plot_raw_traces(session, x=None, version=None, savefig=False,top=False):
 
     if savefig:
         directory = pgt.get_directory(version, subdirectory ='figures')
-        bsid = str(session.metadata['ecephys_session_id'])
-        filename = directory +"example_raw_traces_"+bsid+"_.svg"
+        esid = str(session.metadata['ecephys_session_id'])
+        filename = directory +"example_raw_traces_"+esid+"_.svg"
         print('Figure saved to: '+filename)
         plt.savefig(filename)          
 
