@@ -106,21 +106,21 @@ def compile_interval_duration(summary_df,version):
     for index, row in tqdm(summary_df.iterrows(),total=summary_df.shape[0]):
         try:
             strategy_dir = pgt.get_directory(version, subdirectory='interval_df')
-            interval_df = pd.read_csv(strategy_dir+str(row.behavior_session_id)+'.csv')
+            interval_df = pd.read_csv(strategy_dir+str(row.ecephys_session_id)+'.csv')
         except Exception as e:
             crash += 1
             print(e)
         else:
             bout_df,df = compute_interval_duration(interval_df)
-            bout_df['behavior_session_id'] = row.behavior_session_id 
+            bout_df['ecephys_session_id'] = row.ecephys_session_id 
             b_dfs.append(bout_df)
             dfs.append(df)
     print(crash)
 
     bout_df =  pd.concat(b_dfs)
     bout_df = bout_df.merge(
-        summary_df[['behavior_session_id','visual_strategy_session']], 
-        on='behavior_session_id')
+        summary_df[['ecephys_session_id','visual_strategy_session']], 
+        on='ecephys_session_id')
     df = pd.concat(dfs)
 
     return bout_df, df
