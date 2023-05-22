@@ -617,7 +617,7 @@ def plot_session_summary_trajectory(summary_df,trajectory, version=None,
     good_trajectories = ['omissions1','task0','timing1D','omissions','bias',
         'miss', 'reward_rate','is_change','image_false_alarm','image_correct_reject',
         'lick_bout_rate','RT','engaged','hit','lick_hit_fraction_rate',
-        'strategy_weight_index_by_image','engagement_v2']
+        'strategy_weight_index_by_image','engagement']
     if trajectory not in good_trajectories:
         raise Exception('Bad summary variable {}'.format(trajectory))
 

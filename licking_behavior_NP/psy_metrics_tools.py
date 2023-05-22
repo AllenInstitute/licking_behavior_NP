@@ -362,8 +362,11 @@ def annotate_image_rolling_metrics(session,win_dur=640, win_type='gaussian',win_
 
     # Add engagement classification
     reward_threshold = pgt.get_engagement_threshold()
+    lick_bout_threshold = pgt.get_engagement_lick_threshold()
     session.stimulus_presentations_np['engaged'] = \
-        [x > reward_threshold for x in session.stimulus_presentations_np['reward_rate']]
+        [(x[0] > reward_threshold) and (x[1] > lick_bout_threshold) for x in \
+            zip(session.stimulus_presentations_np['reward_rate'],\
+            session.stimulus_presentations_np['bout_rate'])]
 
     # QC
     rewards_sp = session.stimulus_presentations_np.rewarded.sum()

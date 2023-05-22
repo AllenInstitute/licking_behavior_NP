@@ -227,16 +227,16 @@ def make_figure_3():
         savefig=True, version=BEHAVIOR_VERSION)
     pv.plot_engagement_landscape_by_strategy(summary_df, z='weight_timing1D',
         savefig=True, version=BEHAVIOR_VERSION)
-    pv.plot_session_summary_trajectory(summary_df,'engagement_v2',
+    pv.plot_session_summary_trajectory(summary_df,'engagement',
         version=BEHAVIOR_VERSION, categories='visual_strategy_session',
         savefig=True, filetype='.svg', ylim=[0,100],axline=False,xaxis_images=False, 
         ylabel_extra='fraction ',paper_fig=True)
     pv.RT_by_engagement(summary_df,BEHAVIOR_VERSION,savefig=True, filetype='.svg',
-        key='engagement_v2')
+        key='engagement')
     pv.RT_by_group(summary_df,BEHAVIOR_VERSION,engaged='engaged',ylim=.004,
-        savefig=True, filetype='.svg',key='engagement_v2',width=5)
+        savefig=True, filetype='.svg',key='engagement',width=5)
     pv.RT_by_group(summary_df,BEHAVIOR_VERSION,engaged='disengaged',ylim=.004,
-        savefig=True, filetype='.svg',key='engagement_v2',width=5)
+        savefig=True, filetype='.svg',key='engagement',width=5)
 
 def make_figure_3_example():
     session = pgt.get_data(FIG3_BSID)

@@ -154,7 +154,6 @@ def build_training_summary_table(version):
 
     print('Adding engagement information')
     training_summary = add_training_engagement_metrics(training_summary)
-    training_summary = engagement_updates(training_summary)    
 
     print('Annotating mouse strategy')
     training_summary = add_mouse_strategy(training_summary)
@@ -335,19 +334,6 @@ def add_training_engagement_metrics(summary_df,min_engaged_fraction=0.05):
             if (summary_df.loc[x]['fraction_engaged'] < 1-min_engaged_fraction) &
             (not np.all(np.isnan(summary_df.loc[x][column][summary_df.loc[x]['engaged']==False]))) 
             else np.nan for x in summary_df.index.values]
-    return summary_df
-
-
-def engagement_updates(summary_df):
-    summary_df['engagement_v1'] = [[]]*len(summary_df)      
-    summary_df['engagement_v2'] = [[]]*len(summary_df)      
-    summary_df['engagement_v1'] = summary_df['engaged']
-    v2 = []
-    for index, row in tqdm(summary_df.iterrows(), total=summary_df.shape[1]):
-        this = np.array([x[0] and x[1] > 0.1 \
-            for x in zip(row.engagement_v1, row.lick_bout_rate)])
-        v2.append(this)
-    summary_df['engagement_v2'] = v2
     return summary_df
 
 

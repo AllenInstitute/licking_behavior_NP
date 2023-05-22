@@ -310,6 +310,12 @@ def get_engagement_threshold():
     '''
     return 1/120
 
+def get_engagement_lick_threshold():
+    '''
+        Definition for engagement in units of rewards/sec
+    '''
+    return 1/10
+
     
 def get_bout_threshold():
     '''
