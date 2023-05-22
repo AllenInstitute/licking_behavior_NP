@@ -6,7 +6,7 @@ import psy_general_tools as pgt
 
 # Parse optional arguments
 parser = argparse.ArgumentParser(description='deploy behavior fits to cluster')
-parser.add_argument('--env-path', type=str, default='visbeh', metavar='path to conda environment to use')
+parser.add_argument('--env-path', type=str, default='np', metavar='path to conda environment to use')
 parser.add_argument('--version', type=str, default='0', metavar='model version')
 parser.add_argument(
     '--force-overwrite', 
@@ -32,37 +32,37 @@ if __name__ == "__main__":
         os.mkdir(stdout_location)
     print('stdout files will be at {}'.format(stdout_location))
     
-    # Get list of behavior_session_ids
-    manifest = pgt.get_ophys_manifest()
-    behavior_session_ids = manifest.behavior_session_id.values
-    print('behavior_session_ids loaded')
+    # Get list of ecephys_session_ids
+    manifest = pgt.get_np_manifest()
+    ecephys_session_ids = manifest.ecephys_session_id.values
+    print('ecephys_session_ids loaded')
 
     # Iterate through sessions and start jobs if needed
     job_count = 0
-    job_string = "--bsid {} --version {}"
+    job_string = "--esid {} --version {}"
     print('Starting model version '+str(args.version))
-    for behavior_session_id in behavior_session_ids:
+    for ecephys_session_id in ecephys_session_ids:
 
         # Check if fit already exists
         fit_directory = pgt.get_directory(args.version, subdirectory='fits')
-        fit_filename = fit_directory + str(behavior_session_id)+'.pkl'
+        fit_filename = fit_directory + str(ecephys_session_id)+'.pkl'
         already_fit = os.path.exists(fit_filename)
 
         if args.force_overwrite or not already_fit:
         
             # Set up job
             job_count += 1
-            print('starting cluster job for {}, job count = {}'.format(behavior_session_id, job_count))
-            job_title = 'oeid_{}_beh_v_{}'.format(behavior_session_id, args.version)
+            print('starting cluster job for {}, job count = {}'.format(ecephys_session_id, job_count))
+            job_title = 'esid_{}_beh_v_{}'.format(ecephys_session_id, args.version)
             walltime = '4:00:00'
             mem = '2gb'
             job_id = Slurm.JOB_ARRAY_ID
             job_array_id = Slurm.JOB_ARRAY_MASTER_ID
-            output = stdout_location+"/"+str(job_array_id)+"_"+str(job_id)+"_"+str(behavior_session_id)+".out"
+            output = stdout_location+"/"+str(job_array_id)+"_"+str(job_id)+"_"+str(ecephys_session_id)+".out"
     
             # instantiate a SLURM object
             slurm = Slurm(
-                cpus_per_task=16,
+                cpus_per_task=1,
                 job_name=job_title,
                 time=walltime,
                 mem=mem,
@@ -71,7 +71,7 @@ if __name__ == "__main__":
             )
 
             # Start job
-            args_string = job_string.format(behavior_session_id, args.version)
+            args_string = job_string.format(ecephys_session_id, args.version)
             slurm.sbatch('{} {} {}'.format(
                     python_executable,
                     python_file,

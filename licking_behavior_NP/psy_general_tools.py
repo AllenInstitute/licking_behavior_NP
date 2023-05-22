@@ -73,8 +73,8 @@ def get_data(esid):
 
     # Get SDK session object
     print('Loading SDK object')
-    #cache_dir = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/data/'
-    cache_dir = '/allen/programs/mindscope/workgroups/np-behavior/vbn_data_release/vbn_s3_cache/'
+    cache_dir = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/data/'
+    #cache_dir = '/allen/programs/mindscope/workgroups/np-behavior/vbn_data_release/vbn_s3_cache/'
     cache = VisualBehaviorNeuropixelsProjectCache.from_s3_cache(cache_dir=Path(cache_dir))
     session = cache.get_ecephys_session(ecephys_session_id=esid)
 
@@ -93,9 +93,7 @@ def get_data(esid):
     # Get extended stimulus presentations
     add_licks_each_flash(session) 
     add_rewards_each_flash(session)
-    #add_time_from_last_change(session.stimulus_presentations_np) 
-    #add_time_from_last_lick(session.stimulus_presentations_np, session.licks)
-    #add_time_from_last_reward(session.stimulus_presentations_np, session.rewards)
+
     return session
 
 def add_licks_each_flash(session):

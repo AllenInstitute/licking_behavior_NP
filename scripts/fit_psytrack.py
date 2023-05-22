@@ -3,10 +3,10 @@ import argparse
 
 parser = argparse.ArgumentParser(description='fit behavioral model for session_id')
 parser.add_argument(
-    '--bsid', 
+    '--esid', 
     type=int, 
     default=0,
-    metavar='bsid',
+    metavar='esid',
     help='behavior session id'
 )
 parser.add_argument(
@@ -19,4 +19,4 @@ parser.add_argument(
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    ps.process_session(args.bsid, version = int(args.version))
+    ps.process_session(args.esid, version = int(args.version))
