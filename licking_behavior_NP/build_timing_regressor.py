@@ -24,9 +24,9 @@ def build_timing_schematic(session=None, version=None, savefig=False):
     # Annotate licks and bouts if not already done
     if 'bout_number' not in session.licks:
         pm.annotate_licks(session)
-    if 'bout_start' not in session.stimulus_presentations:
+    if 'bout_start' not in session.stimulus_presentations_np:
         pm.annotate_bouts(session)
-    if 'reward_rate' not in session.stimulus_presentations:
+    if 'reward_rate' not in session.stimulus_presentations_np:
         pm.annotate_image_rolling_metrics(session)
     xmin = 344.25 
     xmax = 350.25
@@ -41,7 +41,7 @@ def build_timing_schematic(session=None, version=None, savefig=False):
     bb = .3
     
     xticks = []
-    for index, row in session.stimulus_presentations.iterrows():
+    for index, row in session.stimulus_presentations_np.iterrows():
         if (row.start_time > xmin) & (row.start_time < xmax):
             xticks.append(row.start_time+.125)
             if not row.omitted:

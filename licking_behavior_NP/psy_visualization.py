@@ -1812,24 +1812,24 @@ def plot_segmentation_schematic(session,savefig=False, version=None):
     # Annotate licks and bouts if not already done
     if 'bout_number' not in session.licks:
         pm.annotate_licks(session)
-    if 'bout_start' not in session.stimulus_presentations:
+    if 'bout_start' not in session.stimulus_presentations_np:
         pm.annotate_bouts(session)
-    if 'reward_rate' not in session.stimulus_presentations:
+    if 'reward_rate' not in session.stimulus_presentations_np:
         pm.annotate_image_rolling_metrics(session)
 
 
-    session.stimulus_presentations['images_since_last_lick'] = \
-        session.stimulus_presentations.groupby(\
-        session.stimulus_presentations['bout_end'].cumsum()).cumcount(ascending=True)
-    session.stimulus_presentations['timing_input'] = \
-        [x+1 for x in session.stimulus_presentations['images_since_last_lick'].\
+    session.stimulus_presentations_np['images_since_last_lick'] = \
+        session.stimulus_presentations_np.groupby(\
+        session.stimulus_presentations_np['bout_end'].cumsum()).cumcount(ascending=True)
+    session.stimulus_presentations_np['timing_input'] = \
+        [x+1 for x in session.stimulus_presentations_np['images_since_last_lick'].\
         shift(fill_value=0)]
 
     format_options = ps.get_format_options(version,{})
-    session.stimulus_presentations['timing1D'] = \
+    session.stimulus_presentations_np['timing1D'] = \
         [ps.timing_sigmoid(x, format_options['timing_params']) if x>0 else np.nan for x in \
-        session.stimulus_presentations['timing_input']]
-    session.stimulus_presentations['timing1D_s'] = session.stimulus_presentations['timing1D']*.075 + 0.075
+        session.stimulus_presentations_np['timing_input']]
+    session.stimulus_presentations_np['timing1D_s'] = session.stimulus_presentations_np['timing1D']*.075 + 0.075
 
     style = pstyle.get_style()
     xmin = 570.5
@@ -1848,7 +1848,7 @@ def plot_segmentation_schematic(session,savefig=False, version=None):
     ax.set_ylim([y2-.02-y1_h*1.5,1])
     xticks = []
     xlabels = []
-    for index, row in session.stimulus_presentations.iterrows():
+    for index, row in session.stimulus_presentations_np.iterrows():
         if (row.start_time > xmin) & (row.start_time < xmax):
             xticks.append(row.start_time+.125)
             if row.in_lick_bout:
@@ -1959,9 +1959,9 @@ def plot_session(session,x=None,xStep=5,label_bouts=True,label_rewards=True,
     # Annotate licks and bouts if not already done
     if 'bout_number' not in session.licks:
         pm.annotate_licks(session)
-    if 'bout_start' not in session.stimulus_presentations:
+    if 'bout_start' not in session.stimulus_presentations_np:
         pm.annotate_bouts(session)
-    if 'reward_rate' not in session.stimulus_presentations:
+    if 'reward_rate' not in session.stimulus_presentations_np:
         pm.annotate_image_rolling_metrics(session)
 
     # Set up figure
@@ -1991,7 +1991,7 @@ def plot_session(session,x=None,xStep=5,label_bouts=True,label_rewards=True,
     ytick_labels = []    
 
     # Draw all stimulus presentations
-    for index, row in session.stimulus_presentations.iterrows():
+    for index, row in session.stimulus_presentations_np.iterrows():
         if (row.start_time > min_x) & (row.start_time < max_x):
             if not row.omitted:
                 # Plot stimulus band
@@ -2232,9 +2232,9 @@ def plot_session_metrics(session, plot_list = ['reward_rate','lick_hit_fraction'
     # Annotate licks and bouts if not already done
     if 'bout_number' not in session.licks:
         pm.annotate_licks(session)
-    if 'bout_start' not in session.stimulus_presentations:
+    if 'bout_start' not in session.stimulus_presentations_np:
         pm.annotate_bouts(session)
-    if 'reward_rate' not in session.stimulus_presentations:
+    if 'reward_rate' not in session.stimulus_presentations_np:
         pm.annotate_image_rolling_metrics(session)
 
 
@@ -2280,7 +2280,7 @@ def plot_session_metrics(session, plot_list = ['reward_rate','lick_hit_fraction'
     style = pstyle.get_style()
 
     # Plot licks and rewards on bottom axis 
-    for index, row in session.stimulus_presentations.iterrows():
+    for index, row in session.stimulus_presentations_np.iterrows():
         if row.bout_start:
             fax.axvspan(index,index+1, 0,.333,
                         alpha=0.5,color='k')
@@ -2299,7 +2299,7 @@ def plot_session_metrics(session, plot_list = ['reward_rate','lick_hit_fraction'
 
     # Plot Engagement state
     if not plot_example:
-        engagement_labels = session.stimulus_presentations['engaged'].values
+        engagement_labels = session.stimulus_presentations_np['engaged'].values
         engagement_labels=[0 if x else 1 for x in engagement_labels]
         change_point = np.where(~(np.diff(engagement_labels) == 0))[0]
         change_point = np.concatenate([[0], change_point, [len(engagement_labels)]])
@@ -2334,7 +2334,7 @@ def plot_session_metrics(session, plot_list = ['reward_rate','lick_hit_fraction'
 
     if 'reward_rate' in plot_list:
         # Plot Reward Rate
-        reward_rate = session.stimulus_presentations.reward_rate
+        reward_rate = session.stimulus_presentations_np.reward_rate
         if plot_engagement_example:
             ax.plot(reward_rate,color='red',
                 label='reward rate (rewards/s)')           
@@ -2343,18 +2343,18 @@ def plot_session_metrics(session, plot_list = ['reward_rate','lick_hit_fraction'
                 label='reward rate (rewards/s)')
 
     if 'prediction' in plot_list:
-        prediction = session.stimulus_presentations.prediction
+        prediction = session.stimulus_presentations_np.prediction
         ax.plot(prediction, color='black',label='model')
 
     if 'target' in plot_list:
-        target = session.stimulus_presentations.target
+        target = session.stimulus_presentations_np.target
         ax.plot(target, color='gray',alpha=style['data_alpha'],
             label='data')
 
 
     if 'lick_bout_rate' in plot_list:
         # Plot Lick Bout Rate
-        lick_bout_rate = session.stimulus_presentations.bout_rate
+        lick_bout_rate = session.stimulus_presentations_np.bout_rate
         if plot_engagement_example:
             ax.plot(lick_bout_rate,color='black',
                 label='lick bout rate (bouts/s)')   
@@ -2364,38 +2364,38 @@ def plot_session_metrics(session, plot_list = ['reward_rate','lick_hit_fraction'
 
     if 'lick_hit_fraction' in plot_list:
         # Plot Lick Hit Fraction Rate
-        lick_hit_fraction = session.stimulus_presentations.lick_hit_fraction
+        lick_hit_fraction = session.stimulus_presentations_np.lick_hit_fraction
         ax.plot(lick_hit_fraction,color=colors['lick_hit_fraction'],
             label='Lick Hit Fraction')
 
     if 'd_prime' in plot_list:
         # Plot d_prime
-        d_prime = session.stimulus_presentations.d_prime
+        d_prime = session.stimulus_presentations_np.d_prime
         ax.plot(d_prime,color=colors['d_prime'],label='d\'')
 
     if 'criterion' in plot_list:
         # Plot criterion
-        criterion = session.stimulus_presentations.criterion
+        criterion = session.stimulus_presentations_np.criterion
         ax.plot(criterion,color=colors['criterion'],label='criterion')
 
     if 'hit_rate' in plot_list:
         # Plot hit_rate
-        hit_rate = session.stimulus_presentations.hit_rate
+        hit_rate = session.stimulus_presentations_np.hit_rate
         ax.plot(hit_rate,color=colors['hit'],label='hit %')
 
     if 'miss_rate' in plot_list:
         # Plot miss_rate
-        miss_rate = session.stimulus_presentations.miss_rate
+        miss_rate = session.stimulus_presentations_np.miss_rate
         ax.plot(miss_rate,color=colors['miss'],label='miss %')
 
     if 'false_alarm' in plot_list:
         # Plot false_alarm_rate
-        false_alarm_rate = session.stimulus_presentations.false_alarm_rate
+        false_alarm_rate = session.stimulus_presentations_np.false_alarm_rate
         ax.plot(false_alarm_rate,color=colors['false_alarm'],label='false alarm %')
 
     if 'correct_reject' in plot_list:
         # Plot correct_reject_rate
-        correct_reject_rate = session.stimulus_presentations.correct_reject_rate
+        correct_reject_rate = session.stimulus_presentations_np.correct_reject_rate
         ax.plot(correct_reject_rate,color=colors['correct_reject'],
             label='correct reject %')
     
@@ -2499,9 +2499,9 @@ def add_fit_prediction(session,version,smoothing_size=50):
     # Annotate licks and bouts if not already done
     if 'bout_number' not in session.licks:
         pm.annotate_licks(session)
-    if 'bout_start' not in session.stimulus_presentations:
+    if 'bout_start' not in session.stimulus_presentations_np:
         pm.annotate_bouts(session)
-    if 'reward_rate' not in session.stimulus_presentations:
+    if 'reward_rate' not in session.stimulus_presentations_np:
         pm.annotate_image_rolling_metrics(session)
 
     # Get full model prediction and target
@@ -2514,10 +2514,10 @@ def add_fit_prediction(session,version,smoothing_size=50):
     target = pgt.moving_mean(target, smoothing_size,mode='same')
 
     # Align target and prediction with stimulus table
-    session.stimulus_presentations.at[\
-        ~session.stimulus_presentations['in_lick_bout'], 'prediction'] = prediction
-    session.stimulus_presentations.at[\
-        ~session.stimulus_presentations['in_lick_bout'], 'target'] = target
+    session.stimulus_presentations_np.at[\
+        ~session.stimulus_presentations_np['in_lick_bout'], 'prediction'] = prediction
+    session.stimulus_presentations_np.at[\
+        ~session.stimulus_presentations_np['in_lick_bout'], 'target'] = target
 
 
 def plot_session_engagement(session,version, savefig=False):
@@ -3060,9 +3060,9 @@ def plot_engagement_comparison(summary_df,version, savefig=False,group=None,
 def plot_strategy_examples(session, version=None, savefig=False,max_events=20,sort_by_RT=False):
     if 'bout_number' not in session.licks:
         pm.annotate_licks(session)
-    if 'bout_start' not in session.stimulus_presentations:
+    if 'bout_start' not in session.stimulus_presentations_np:
         pm.annotate_bouts(session)
-    if 'reward_rate' not in session.stimulus_presentations:
+    if 'reward_rate' not in session.stimulus_presentations_np:
         pm.annotate_image_rolling_metrics(session)
 
     fig, ax = plt.subplots(2,2,figsize=(6,4))
@@ -3119,37 +3119,37 @@ def plot_strategy_examples_inner(ax,session, max_events, example,sort_by_RT=Fals
         ax.axvspan(image, image+0.25,alpha=0.1,color='k')
 
     # Get epochs for this example
-    session.stimulus_presentations['images_since_last_lick'] = \
-        session.stimulus_presentations.groupby(\
-        session.stimulus_presentations['bout_end'].cumsum()).cumcount(ascending=True)
-    session.stimulus_presentations['timing_input'] = \
-        [x+1 for x in session.stimulus_presentations['images_since_last_lick'].\
+    session.stimulus_presentations_np['images_since_last_lick'] = \
+        session.stimulus_presentations_np.groupby(\
+        session.stimulus_presentations_np['bout_end'].cumsum()).cumcount(ascending=True)
+    session.stimulus_presentations_np['timing_input'] = \
+        [x+1 for x in session.stimulus_presentations_np['images_since_last_lick'].\
         shift(fill_value=0)]
     if example == 'task': 
-        events = session.stimulus_presentations\
+        events = session.stimulus_presentations_np\
             .query('is_change & bout_start')
         if sort_by_RT:
             events = events.iloc[0:max_events]
             events = events.sort_values(by=['RT']) 
         events = events['start_time'].values[5:] #Skipping autorewards
     elif example == 'omission':
-        events = session.stimulus_presentations\
+        events = session.stimulus_presentations_np\
             .query('omitted & bout_start & (timing_input>2)')
         if sort_by_RT:
             events = events.iloc[0:max_events]
             events = events.sort_values(by=['RT']) 
         events = events['start_time'].values
     elif example == 'post_omission':
-        session.stimulus_presentations['post_omission'] =\
-            session.stimulus_presentations['omitted'].shift(1,fill_value=False)
-        events = session.stimulus_presentations\
+        session.stimulus_presentations_np['post_omission'] =\
+            session.stimulus_presentations_np['omitted'].shift(1,fill_value=False)
+        events = session.stimulus_presentations_np\
             .query('post_omission & bout_start &(timing_input>3)')
         if sort_by_RT:
             events = events.iloc[0:max_events]
             events = events.sort_values(by=['RT']) 
         events = events['start_time'].values - .75
     elif example == 'timing':
-        events = session.stimulus_presentations\
+        events = session.stimulus_presentations_np\
             .query('(timing_input in @timing_count)&bout_start')
         if sort_by_RT:
             events = events.iloc[0:max_events]
@@ -3205,9 +3205,9 @@ def plot_session_diagram(session,x=None,xStep=5,version=None):
     # Annotate licks and bouts if not already done
     if 'bout_number' not in session.licks:
         pm.annotate_licks(session)
-    if 'bout_start' not in session.stimulus_presentations:
+    if 'bout_start' not in session.stimulus_presentations_np:
         pm.annotate_bouts(session)
-    if 'reward_rate' not in session.stimulus_presentations:
+    if 'reward_rate' not in session.stimulus_presentations_np:
         pm.annotate_image_rolling_metrics(session)
 
     # Get fit
@@ -3236,7 +3236,7 @@ def plot_session_diagram(session,x=None,xStep=5,version=None):
     ytick_labels = []    
 
     # Draw all stimulus presentations
-    for index, row in session.stimulus_presentations.iterrows():
+    for index, row in session.stimulus_presentations_np.iterrows():
         if (row.start_time > min_x) & (row.start_time < max_x):
             if not row.omitted:
                 # Plot stimulus band
@@ -3400,9 +3400,9 @@ def plot_session_weights_example(session,version=None):
     # Annotate licks and bouts if not already done
     if 'bout_number' not in session.licks:
         pm.annotate_licks(session)
-    if 'bout_start' not in session.stimulus_presentations:
+    if 'bout_start' not in session.stimulus_presentations_np:
         pm.annotate_bouts(session)
-    if 'reward_rate' not in session.stimulus_presentations:
+    if 'reward_rate' not in session.stimulus_presentations_np:
         pm.annotate_image_rolling_metrics(session)
 
     esid = session.metadata['ecephys_session_id']
@@ -3473,9 +3473,9 @@ def plot_raw_traces(session, x=None, version=None, savefig=False,top=False):
     # Annotate licks and bouts if not already done
     if 'bout_number' not in session.licks:
         pm.annotate_licks(session)
-    if 'bout_start' not in session.stimulus_presentations:
+    if 'bout_start' not in session.stimulus_presentations_np:
         pm.annotate_bouts(session)
-    if 'reward_rate' not in session.stimulus_presentations:
+    if 'reward_rate' not in session.stimulus_presentations_np:
         pm.annotate_image_rolling_metrics(session)
 
     # Set up figure
@@ -3515,7 +3515,7 @@ def plot_raw_traces(session, x=None, version=None, savefig=False,top=False):
     max_x = x[1]+50
 
     # Draw all stimulus presentations
-    for index, row in session.stimulus_presentations.iterrows():
+    for index, row in session.stimulus_presentations_np.iterrows():
         if (row.start_time > min_x) & (row.start_time < max_x):
             if not row.omitted:
                 # Plot stimulus band

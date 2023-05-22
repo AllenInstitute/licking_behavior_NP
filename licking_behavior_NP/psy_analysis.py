@@ -36,7 +36,7 @@ def build_session_interval_df(esid,version):
     session = pgt.get_data(esid)
     pm.get_metrics(session)
 
-    df = session.stimulus_presentations
+    df = session.stimulus_presentations_np
     df['first_lick_time'] = [row.licks[0] if len(row.licks) > 0 else np.nan
         for index, row in df.iterrows()]
     df['last_lick_time'] = [row.licks[-1] if len(row.licks) > 0 else np.nan
