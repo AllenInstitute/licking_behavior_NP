@@ -192,11 +192,7 @@ def build_core_table(version):
         else:
             summary_df.at[index,'behavior_fit_available'] = True 
             summary_df.at[index,'session_roc'] = ps.compute_model_roc(fit)
-            #summary_df.at[index,'num_trial_false_alarm'] = \
-            #    np.sum(fit['psydata']['full_df']['false_alarm'])
-            #summary_df.at[index,'num_trial_correct_reject'] = \
-            #    np.sum(fit['psydata']['full_df']['correct_reject'])
-
+            
             # Get Strategy indices
             model_dex, taskdex,timingdex = ps.get_timing_index_fit(fit) 
             summary_df.at[index,'strategy_dropout_index'] = model_dex
