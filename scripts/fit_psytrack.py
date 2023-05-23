@@ -1,4 +1,4 @@
-import psy_tools as ps 
+import licking_behavior_NP.psy_tools as ps 
 import argparse
 
 parser = argparse.ArgumentParser(description='fit behavioral model for session_id')

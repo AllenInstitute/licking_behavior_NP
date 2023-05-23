@@ -2,7 +2,7 @@ import os
 import time
 import argparse
 from simple_slurm import Slurm
-import psy_general_tools as pgt
+import licking_behavior_NP.psy_general_tools as pgt
 
 # Parse optional arguments
 parser = argparse.ArgumentParser(description='deploy behavior fits to cluster')
