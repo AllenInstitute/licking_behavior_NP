@@ -158,8 +158,8 @@ def build_summary_table(version):
     summary_df = build_core_table(version)
     summary_df = build_strategy_labels(summary_df)
 
-    print('Creating strategy matched subset')
-    summary_df = build_strategy_matched_subset(summary_df)
+    #print('Creating strategy matched subset')
+    #summary_df = build_strategy_matched_subset(summary_df)
 
     print('Loading image by image information')
     summary_df = add_time_aligned_session_info(summary_df,version)
@@ -183,7 +183,7 @@ def build_core_table(version):
     '''
     summary_df = pgt.get_np_manifest().copy()
 
-    summary_df['behavior_fit_available'] = summary_df['trained_A'] #copying column size
+    summary_df['behavior_fit_available'] = False 
     for index, row in tqdm(summary_df.iterrows(),total=summary_df.shape[0]):
         try:
             fit = ps.load_fit(row.behavior_session_id,version=version)
@@ -192,10 +192,10 @@ def build_core_table(version):
         else:
             summary_df.at[index,'behavior_fit_available'] = True 
             summary_df.at[index,'session_roc'] = ps.compute_model_roc(fit)
-            summary_df.at[index,'num_trial_false_alarm'] = \
-                np.sum(fit['psydata']['full_df']['false_alarm'])
-            summary_df.at[index,'num_trial_correct_reject'] = \
-                np.sum(fit['psydata']['full_df']['correct_reject'])
+            #summary_df.at[index,'num_trial_false_alarm'] = \
+            #    np.sum(fit['psydata']['full_df']['false_alarm'])
+            #summary_df.at[index,'num_trial_correct_reject'] = \
+            #    np.sum(fit['psydata']['full_df']['correct_reject'])
 
             # Get Strategy indices
             model_dex, taskdex,timingdex = ps.get_timing_index_fit(fit) 
@@ -282,7 +282,7 @@ def add_time_aligned_session_info(summary_df,version):
     weight_columns = pgt.get_strategy_list(version)
     columns = {'hit','miss','image_false_alarm','image_correct_reject',
         'is_change', 'omitted', 'lick_bout_rate','reward_rate','RT','engaged',
-        'lick_bout_start','image_index'} 
+        'lick_bout_start','image_name'} 
     for column in weight_columns:
         summary_df['weight_'+column] = [[]]*len(summary_df)
     for column in columns:
@@ -387,7 +387,7 @@ def build_strategy_labels(summary_df):
         summary_df['visual_strategy_session']] 
     none_strategies = (summary_df['dropout_task0'] > -7.5)&\
         (summary_df['dropout_timing1D'] > -7.5)
-    summary_df.at[none_strategies,'strategy_labels_with_none'] = 'no strategy'
+    summary_df.loc[none_strategies,'strategy_labels_with_none'] = 'no strategy'
 
     # mixed strategy group
     quantiles = np.quantile(summary_df['strategy_dropout_index'],[.33,.66])
@@ -397,7 +397,7 @@ def build_strategy_labels(summary_df):
         summary_df['visual_strategy_session']] 
     mixed_strategies = (summary_df['strategy_dropout_index'] > quantiles[0])&\
         (summary_df['strategy_dropout_index'] < quantiles[1])
-    summary_df.at[mixed_strategies,'strategy_labels_with_mixed'] = 'mixed'
+    summary_df.loc[mixed_strategies,'strategy_labels_with_mixed'] = 'mixed'
     
     return summary_df
 
@@ -463,7 +463,7 @@ def build_change_table(summary_df, version):
             session_df = pd.read_csv(strategy_dir+str(row.behavior_session_id)+'.csv')
             df = session_df.query('is_change').reset_index(drop=True)
             df['behavior_session_id'] = row.behavior_session_id
-            df = df.rename(columns={'image_index':'post_change_image'})
+            df = df.rename(columns={'image_name':'post_change_image'})
             df['pre_change_image'] = df['post_change_image'].shift(1)
             df['image_repeats'] = df['stimulus_presentations_id'].diff()
             df = df.drop(columns=['stimulus_presentations_id','image_name',
