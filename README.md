@@ -3,7 +3,7 @@ Analysis of mouse licking behavior during visually guided behavior. Primarily, t
 
 This repository is specific to the Visual Behavior Neuropixels dataset. If you want to look at the Visual Behavior Optical Physiology dataset use github.com/alexpiet/licking_behavior. The model works the same but the data is loaded and processed slightly differently due to the VBN sessions being structured differently. 
 
-## Time Varying Regression Model
+## Time varying regression model
 
 The model predicts the probability of the mouse starting a licking bout on each image presentation. Its described as the sum of several time-varying strategies. 
 
@@ -13,7 +13,7 @@ The model predicts the probability of the mouse starting a licking bout on each 
 - Omission0, is a strategy that wants to lick on every omission
 - Omission1, is a strategy that wants to lick on the image after every omission
 
-### Fitting the Time Varying Regression model
+### Fitting the time varying regression model
 > import licking_behavior_NP.psy_tools as ps  
 > for bsid in behavior_session_ids:  
 >    ps.process_session(bsid)  
