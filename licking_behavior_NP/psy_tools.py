@@ -851,7 +851,11 @@ def summarize_fit(fit, version=None, savefig=False):
 
     fig.text(.7,starty-offset*1,"Driver Line:  " ,fontsize=fs,\
         horizontalalignment='right')
-    fig.text(.7,starty-offset*1,fit['metadata']['driver_line'][-1],fontsize=fs)
+    if len(fit['metadata']['driver_line']) > 0:
+        driver = fit['metadata']['driver_line'][-1]
+    else:   
+        driver = ''
+    fig.text(.7,starty-offset*1,driver,fontsize=fs)
 
     fig.text(.7,starty-offset*2,"Stage:  "     ,fontsize=fs,horizontalalignment='right')
     fig.text(.7,starty-offset*2,str(fit['metadata']['session_type']),fontsize=fs)
