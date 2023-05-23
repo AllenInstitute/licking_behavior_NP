@@ -34,7 +34,7 @@ def get_model_versions(vrange=[20,22]):
     print('')
     return out_versions
 
-def get_model_inventory(version,include_4x2=False):
+def get_model_inventory(version):
     '''
         Takes the version as either a number of string 'psy_fits_v<>' and
         returns a dictionary of missing and fit sessions
@@ -48,7 +48,7 @@ def get_model_inventory(version,include_4x2=False):
         version = 'psy_fits_v'+str(version_num)
 
     # Get information on what SHOULD be available
-    manifest = pgt.get_ophys_manifest(include_4x2=include_4x2).copy()
+    manifest = pgt.get_np_manifest().copy()
 
     # Check what is actually available. 
     fit_directory=pgt.get_directory(version_num,subdirectory='fits')
@@ -78,7 +78,7 @@ def get_model_inventory(version,include_4x2=False):
     inventory['version'] = version
     return inventory
 
-def build_inventory_table(vrange=[20,22],include_4x2=False):
+def build_inventory_table(vrange=[20,22]):
     '''
         Returns a dataframe with the number of sessions fit and missing for 
         each model version
@@ -89,7 +89,7 @@ def build_inventory_table(vrange=[20,22],include_4x2=False):
     # Get inventory for each version
     inventories = []
     for v in versions:
-        inventories.append(get_model_inventory(v,include_4x2=include_4x2))
+        inventories.append(get_model_inventory(v))
 
     # Combine inventories into dataframe
     table = pd.DataFrame(inventories)
@@ -145,7 +145,7 @@ def save_version_parameters(VERSION):
     with open(json_path, 'w') as json_file:
         json.dump(format_options, json_file, indent=4)
 
-def get_ophys_summary_table(version):
+def get_np_summary_table(version):
     model_dir = pgt.get_directory(version,subdirectory='summary')
     return pd.read_pickle(model_dir+'_summary_table.pkl')
 
@@ -174,15 +174,14 @@ def build_summary_table(version):
 
     return summary_df 
 
-def build_core_table(version,include_4x2=False):
+def build_core_table(version):
     '''
         Builds a summary_df of model results, each row is a behavioral session. 
 
         version (int), behavioral model version        
-        include_4x2 (bool), whether to include the 4 areas 2 depths dataset. 
     
     '''
-    summary_df = pgt.get_ophys_manifest(include_4x2=include_4x2).copy()
+    summary_df = pgt.get_np_manifest().copy()
 
     summary_df['behavior_fit_available'] = summary_df['trained_A'] #copying column size
     for index, row in tqdm(summary_df.iterrows(),total=summary_df.shape[0]):

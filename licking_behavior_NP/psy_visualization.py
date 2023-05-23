@@ -1857,7 +1857,7 @@ def plot_segmentation_schematic(session,savefig=False, version=None):
                 xlabels.append(row.timing_input)
             if not row.omitted:
                 # Plot stimulus band
-                ax.axvspan(row.start_time,row.stop_time, 
+                ax.axvspan(row.start_time,row.end_time, 
                     alpha=0.1,color='k', label='image')
             else:
                 # Plot omission line
@@ -1995,7 +1995,7 @@ def plot_session(session,x=None,xStep=5,label_bouts=True,label_rewards=True,
         if (row.start_time > min_x) & (row.start_time < max_x):
             if not row.omitted:
                 # Plot stimulus band
-                ax.axvspan(row.start_time,row.stop_time, 
+                ax.axvspan(row.start_time,row.end_time, 
                     alpha=0.1,color='k', label='image')
             else:
                 # Plot omission line
@@ -2004,7 +2004,7 @@ def plot_session(session,x=None,xStep=5,label_bouts=True,label_rewards=True,
 
             # Plot image change
             if row.is_change:
-                ax.axvspan(row.start_time,row.stop_time, alpha=0.5,
+                ax.axvspan(row.start_time,row.end_time, alpha=0.5,
                     color=style['schematic_change'], label='change image')
             
             # Plot licked image
@@ -2114,8 +2114,8 @@ def plot_session(session,x=None,xStep=5,label_bouts=True,label_rewards=True,
                 first().timestamps)), 'rv',alpha=.5,markersize=8)
 
             # Label auto rewards
-            ax.plot(session.rewards.query('autorewarded').timestamps,
-                np.zeros(np.shape(session.rewards.query('autorewarded').\
+            ax.plot(session.rewards.query('auto_rewarded').timestamps,
+                np.zeros(np.shape(session.rewards.query('auto_rewarded').\
                 timestamps.values))+0.95, 
                 'rv', label='auto reward',markersize=8,markerfacecolor='w')
             yticks.append(.95)
@@ -3240,7 +3240,7 @@ def plot_session_diagram(session,x=None,xStep=5,version=None):
         if (row.start_time > min_x) & (row.start_time < max_x):
             if not row.omitted:
                 # Plot stimulus band
-                ax.axvspan(row.start_time,row.stop_time, 
+                ax.axvspan(row.start_time,row.end_time, 
                     alpha=0.1,color='k', label='image')
             else:
                 # Plot omission line
@@ -3249,7 +3249,7 @@ def plot_session_diagram(session,x=None,xStep=5,version=None):
 
             # Plot image change
             if row.is_change:
-                ax.axvspan(row.start_time,row.stop_time, alpha=0.5,
+                ax.axvspan(row.start_time,row.end_time, alpha=0.5,
                     color=style['schematic_change'], label='change image')
             
             # Plot licked image
@@ -3519,7 +3519,7 @@ def plot_raw_traces(session, x=None, version=None, savefig=False,top=False):
         if (row.start_time > min_x) & (row.start_time < max_x):
             if not row.omitted:
                 # Plot stimulus band
-                ax.axvspan(row.start_time,row.stop_time, 
+                ax.axvspan(row.start_time,row.end_time, 
                     alpha=0.1,color='k', label='image')
             else:
                 # Plot omission line
@@ -3528,7 +3528,7 @@ def plot_raw_traces(session, x=None, version=None, savefig=False,top=False):
 
             # Plot image change
             if row.is_change:
-                ax.axvspan(row.start_time,row.stop_time, alpha=0.5,
+                ax.axvspan(row.start_time,row.end_time, alpha=0.5,
                     color=style['schematic_change'], label='change image')
             
     # Label licking
