@@ -41,7 +41,7 @@ def make_figure_1_supplement_behavior():
             num hits, num false alarms?
             licking rate etc over session
     '''
-    summary_df = po.get_ophys_summary_table(BEHAVIOR_VERSION)
+    summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)
     pv.plot_session_summary_trajectory(summary_df,'reward_rate',version=BEHAVIOR_VERSION,
         savefig=True, filetype=FIGTYPE,xaxis_images=False,ylim=[0,None],axline=False,
         width=5)
@@ -73,6 +73,7 @@ def make_figure_1_supplement_behavior():
 
 
 def make_figure_1_timing_regressor():
+    raise Exception('Need to pick an example bsid')
     bsid = pgt.get_debugging_id(1)
     session = pgt.get_data(bsid)
     #b.build_timing_schematic(session, version=BEHAVIOR_VERSION, savefig=True)
@@ -85,6 +86,7 @@ def make_figure_1_timing_regressor():
     pv.plot_chronometric(bouts_df,BEHAVIOR_VERSION,savefig=True)
 
 def make_figure_1_timing_end_of_lick_bout():
+    raise Exception('need to compute licks table')
     licks_df = po.get_licks_table(BEHAVIOR_VERSION)
     bouts_df = po.build_bout_table(licks_df)
     pv.plot_interlick_interval(bouts_df,key='pre_ibi',version=BEHAVIOR_VERSION,
@@ -95,8 +97,9 @@ def make_figure_1_timing_end_of_lick_bout():
 
 
 def make_figure_1_supplement_task():
+    raise Exception('need to compute change table')
     change_df = po.get_change_table(BEHAVIOR_VERSION)
-    summary_df = po.get_ophys_summary_table(BEHAVIOR_VERSION)
+    summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)
 
     pv.plot_image_pair_repetitions(change_df, BEHAVIOR_VERSION,savefig=True,
         filetype=FIGTYPE)
@@ -108,9 +111,10 @@ def make_figure_1_supplement_task():
 
 
 def make_figure_1_supplement_licking():
+    raise Exception('need to compute licks table')
     licks_df = po.get_licks_table(BEHAVIOR_VERSION)
     bouts_df = po.build_bout_table(licks_df)
-    summary_df = po.get_ophys_summary_table(BEHAVIOR_VERSION)
+    summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)
     summary_df['all'] = True
 
     pv.plot_interlick_interval(licks_df, version=BEHAVIOR_VERSION,
@@ -121,6 +125,7 @@ def make_figure_1_supplement_licking():
 
 
 def make_figure_2_raw_data():
+    raise Exception('need to pick example bsids')
     timing_bsid = 794071128
     visual_bsid = 943479988
     timing_session = pgt.get_data(timing_bsid)
@@ -131,7 +136,7 @@ def make_figure_2_raw_data():
 
 
 def make_figure_2():
-    summary_df = po.get_ophys_summary_table(BEHAVIOR_VERSION)
+    summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)
     summary_df = pv.plot_static_comparison(summary_df,version=BEHAVIOR_VERSION, 
         savefig=True,filetype=FIGTYPE)
     pv.plot_session_summary_dropout(summary_df,version=BEHAVIOR_VERSION,savefig=True,
@@ -153,7 +158,7 @@ def make_figure_2():
 
 
 def make_figure_2_supplement_model_validation():
-    summary_df = po.get_ophys_summary_table(BEHAVIOR_VERSION)
+    summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)
     pv.plot_static_comparison(summary_df,version=BEHAVIOR_VERSION, savefig=True,
         filetype=FIGTYPE)
     pv.scatter_df(summary_df,'strategy_dropout_index','lick_hit_fraction', 
@@ -168,7 +173,7 @@ def make_figure_2_supplement_model_validation():
 
 
 def make_figure_2_supplement_strategy_characterization():
-    summary_df = po.get_ophys_summary_table(BEHAVIOR_VERSION)   
+    summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)   
     # Plot session-wise metrics against strategy weights
     event=['hits','miss','lick_fraction']
     for e in event:
@@ -177,7 +182,7 @@ def make_figure_2_supplement_strategy_characterization():
 
 
 def make_figure_2_supplement_strategy_characterization_rates():
-    summary_df = po.get_ophys_summary_table(BEHAVIOR_VERSION)   
+    summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)   
     # Plot image-wise metrics, averaged across sessions
     events = ['bias','task0','omissions','omissions1','timing1D']
     pv.plot_session_summary_multiple_trajectory(\
@@ -197,13 +202,13 @@ def make_figure_2_supplement_strategy_characterization_rates():
             xaxis_images=False,ylim=[0,None],axline=False)
 
 def make_figure_2_supplement_pca():
-    summary_df = po.get_ophys_summary_table(BEHAVIOR_VERSION)
+    summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)
     pa.compute_PCA(summary_df, version=BEHAVIOR_VERSION,on='dropout',
         savefig=True)
 
 
 def make_figure_2_novelty():
-    summary_df = po.get_ophys_summary_table(BEHAVIOR_VERSION)  
+    summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)  
     pv.scatter_df_by_experience(summary_df, ['Familiar','Novel 1'],
         'strategy_dropout_index',experience_type='experience_level',
         version=BEHAVIOR_VERSION,savefig=True, filetype=FIGTYPE) 
@@ -219,7 +224,7 @@ def make_figure_2_novelty():
 
 
 def make_figure_3():
-    summary_df = po.get_ophys_summary_table(BEHAVIOR_VERSION)
+    summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)
     pv.plot_engagement_analysis(summary_df,BEHAVIOR_VERSION,savefig=True, filetype=FIGTYPE,
         just_landscape=True)
     pv.plot_engagement_landscape_by_strategy(summary_df, z='weight_task0',
@@ -244,7 +249,8 @@ def make_figure_3_example():
         plot_engagement_example=True,version=BEHAVIOR_VERSION)
 
 def make_figure_4_supplement_strategy_matched():
-    summary_df = po.get_ophys_summary_table(BEHAVIOR_VERSION)
+    raise Exception('Need to define strategy matched subset')
+    summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)
     pv.scatter_df(summary_df, 'visual_only_dropout_index','timing_only_dropout_index',
         flip1=True, flip2=True,categories='cre_line',savefig=True,  
         version=BEHAVIOR_VERSION,filetype=FIGTYPE,figsize=(5,4))
