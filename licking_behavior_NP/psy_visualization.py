@@ -3613,11 +3613,11 @@ def plot_engagement_landscape_by_strategy(summary_df,bins=40,min_points=50,
     if z == 'weight_task0':
         zlabel = 'avg. visual weight'
         vmin=0
-        vmax= 4
+        vmax= 6
     elif z == 'weight_timing1D':
         zlabel = 'avg. timing weight'
         vmin=None
-        vmax= 5
+        vmax= 3.5
     elif z =='lick_hit_fraction':
         zlabel = 'lick hit fraction'
         vmin =0
