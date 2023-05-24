@@ -3,6 +3,10 @@ Analysis of mouse licking behavior during visually guided behavior. Primarily, t
 
 This repository is specific to the Visual Behavior Neuropixels dataset. If you want to look at the Visual Behavior Optical Physiology dataset use github.com/alexpiet/licking_behavior. The model works the same but the data is loaded and processed slightly differently due to the VBN sessions being structured differently. 
 
+## Installation
+> git clone https://github.com/AllenInstitute/licking_behavior_NP  
+> pip install -e . #run in directory with setup.py  
+
 ## Time varying regression model
 
 The model predicts the probability of the mouse starting a licking bout on each image presentation. Its described as the sum of several time-varying strategies. 
@@ -18,11 +22,6 @@ The model predicts the probability of the mouse starting a licking bout on each 
 > for bsid in behavior_session_ids:  
 >    ps.process_session(bsid)  
 
-
-### Diagram of information flow
-![code_diagram](https://user-images.githubusercontent.com/7605170/175404261-4565ab0a-2c82-4215-9840-dffb2b736883.png)
-
-
 ## Model outputs
 The key output dataframes are:
 
@@ -31,9 +30,39 @@ The key output dataframes are:
 - licks_df, each lick across all behavioral sessions is a row
 - bouts_df, each licking bout across all behavioral sessions is a row
 
+### Diagram of information flow
+![code_diagram](https://user-images.githubusercontent.com/7605170/175404261-4565ab0a-2c82-4215-9840-dffb2b736883.png)
+
 ### summary_df
 > import licking_behavior_NP.psy_output_tools as po  
 > summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)  
+
+The columns of summary_df are:  
+- licked              (bool)  Did the mouse lick during this image?  
+- lick_bout_start     (bool)  did the mouse start a lick bout during this image?  
+- bout_number         (int)   oridinal count of licking bouts, only defined at the start of licking bouts  
+- lick_bout_end       (bool)  did a lick bout end during this image?  
+- in_lick_bout        (bool)   Whether this was an image removed for fitting because the animal was in a licking bout  
+- num_licks           (int)   Number of licks during this image   
+- lick_rate           (float) licks/second   
+- rewarded            (bool)  Whether this image was rewarded  
+- reward_rate         (float) rewards/second  
+- lick_bout_rate      (float) lick-bouts/second  
+- lick_hit_fraction   (float) % Percentage of lick bouts that were rewarded   
+- hit_rate            (float) % Percentage of changes with rewards  
+- miss_rate           (float) % Percentage of changes without rewards  
+- false_alarm_rate    (float) % Percentage of non-changes with licks  
+- correct_reject_rate (float) % Percentage of non-changes without licks  
+- d_prime             (float)  
+- criterion           (float)  
+- RT                  (float) Response time from image onset in s  
+- engaged             (boolean)  
+- strategy weights            model weight for this image  
+-     bias            (float)  
+-     omissions       (float)  
+-     omissions1      (float)  
+-     task0           (float)  
+-     timing1D        (float)   
 
 ### change_df
 > import licking_behavior_NP.psy_output_tools as po  
