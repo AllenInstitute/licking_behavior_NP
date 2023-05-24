@@ -32,35 +32,35 @@ The key output dataframes are:
 - bouts_df, each licking bout across all behavioral sessions is a row
 
 ### summary_df
-> import licking_behavior_NP.psy_output_tools as po
-> summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)
+> import licking_behavior_NP.psy_output_tools as po  
+> summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)  
 
 ### change_df
-> import licking_behavior_NP.psy_output_tools as po
-> change_df = po.get_change_table(BEHAVIOR_VERSION)
+> import licking_behavior_NP.psy_output_tools as po  
+> change_df = po.get_change_table(BEHAVIOR_VERSION)  
 
 ### licks_df
-> import licking_behavior_NP.psy_output_tools as po
-> licks_df = po.get_licks_table(BEHAVIOR_VERSION)
+> import licking_behavior_NP.psy_output_tools as po  
+> licks_df = po.get_licks_table(BEHAVIOR_VERSION)  
 
 ### bouts_df
-> import licking_behavior_NP.psy_output_tools as po
-> licks_df = po.get_licks_table(BEHAVIOR_VERSION)
-> bouts_df = po.build_bout_table(licks_df)
+> import licking_behavior_NP.psy_output_tools as po  
+> licks_df = po.get_licks_table(BEHAVIOR_VERSION)  
+> bouts_df = po.build_bout_table(licks_df)  
 
 ### figure script
-> import licking_behavior_NP.figure_script as f
-> f.make_figure_1_supplement_behavior()
-> f.make_figure_1_timing_end_of_lick_bout()
-> f.make_figure_1_supplement_task()
-> f.make_figure_1_supplement_licking()
-> f.make_figure_2()
-> f.make_figure_2_supplment_model_validation()
-> f.make_figure_2_supplement_strategy_characterization()
-> f.make_figure_2_supplement_strategy_characterization_rates()
-> f.make_figure_2_supplment_pca()
-> f.make_figure_2_novelty()
-> f.make_figure_3()
+> import licking_behavior_NP.figure_script as f  
+> f.make_figure_1_supplement_behavior()  
+> f.make_figure_1_timing_end_of_lick_bout()  
+> f.make_figure_1_supplement_task()  
+> f.make_figure_1_supplement_licking()  
+> f.make_figure_2()  
+> f.make_figure_2_supplment_model_validation()  
+> f.make_figure_2_supplement_strategy_characterization()  
+> f.make_figure_2_supplement_strategy_characterization_rates()  
+> f.make_figure_2_supplment_pca()  
+> f.make_figure_2_novelty()  
+> f.make_figure_3()  
 
 
 
