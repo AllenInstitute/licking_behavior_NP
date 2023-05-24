@@ -11,7 +11,7 @@ from importlib import reload
 
 # Quick start
 ################################################################################
-version=21
+version=100
 summary_df  = po.get_ophys_summary_table(version)
 change_df = po.get_change_table(version)
 licks_df = po.get_licks_table(version)
@@ -38,7 +38,7 @@ session_bouts_df = po.build_bout_table(session_licks_df)
 ## Versions
 ################################################################################
 # Make a new version
-version = 22
+version = 101
 po.make_version(version)
 
 # Get directory for a version
@@ -48,10 +48,10 @@ fits_dir  = pgt.get_directory(version, subdirectory='fits')
 stdf_dir  = pgt.get_directory(version, subdirectory='strategy_df')
 
 # See what model versions are available
-versions = po.get_model_versions(vrange=[20,25])
+versions = po.get_model_versions(vrange=[100,105])
 
 # Build inventory table
-inventory_table = po.build_inventory_table(vrange=[20,25])
+inventory_table = po.build_inventory_table(vrange=[100,105])
 inventory = po.get_model_inventory(version)
 
 # Build summary tables 
@@ -60,8 +60,8 @@ change_df, crashed= po.build_change_table(summary_df, version)
 licks_df, crashed = po.build_licks_table(summary_df, version)
 
 # Compare across versions
-merged_df = po.build_comparison_df(summary_df_20, summary_df_21,'20','21')
-pv.compare_across_versions(merged_df,'session_roc'],[20,21])
+merged_df = po.build_comparison_df(summary_df_100, summary_df_101,'100','101')
+pv.compare_across_versions(merged_df,'session_roc'],[100,101])
 
 
 ## Useful functions
@@ -128,7 +128,7 @@ pv.plot_session(session,detailed=True,fit=fit)
 pv.plot_session_metrics(session)
 
 # Load summary tables
-version =21
+version =100
 summary_df  = po.get_ophys_summary_table(version)
 change_df   = po.get_change_table(version)
 licks_df    = po.get_licks_table(version)
