@@ -148,7 +148,7 @@ The columns of bouts_df are:
 > f.make_figure_1_supplement_task()  
 > f.make_figure_1_supplement_licking()  
 > f.make_figure_2()  
-> f.make_figure_2_supplment_model_validation()  
+> f.make_figure_2_supplement_model_validation()  
 > f.make_figure_2_supplement_strategy_characterization()  
 > f.make_figure_2_supplement_strategy_characterization_rates()  
 > f.make_figure_2_supplment_pca()  

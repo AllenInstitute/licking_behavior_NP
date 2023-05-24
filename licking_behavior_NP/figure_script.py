@@ -152,7 +152,7 @@ def make_figure_2():
         cindex='strategy_dropout_index',version=BEHAVIOR_VERSION, 
         savefig=SAVEFIG, filetype=FIGTYPE)
     pv.scatter_df_by_mouse(summary_df,'strategy_dropout_index',version=BEHAVIOR_VERSION,
-        savefig=SAVEFIG,filetype=FIGTYPE)
+        savefig=SAVEFIG,filetype=FIGTYPE,show_ve=True)
 
 
 def make_figure_2_supplement_model_validation():

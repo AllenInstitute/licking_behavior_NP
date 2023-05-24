@@ -458,8 +458,8 @@ def plot_session_summary_weight_avg_scatter_task0(summary_df, version=None,
         linestyle=style['regression_linestyle'])
     score = round(model.score(x,y),2)
     ax.set_aspect('equal')
-    ax.set_xlim(-1.25,3.75)
-    ax.set_ylim(-2,3)
+    ax.set_xlim(0,6.5)
+    ax.set_ylim(-.5,4)
     plt.tight_layout()
     if savefig:
         directory=pgt.get_directory(version,subdirectory='figures',group=group) 
