@@ -907,7 +907,7 @@ def get_static_roc(fit,use_cv=False):
     if use_cv:
         clf = logregcv(cv=10)
     else:
-        clf = logreg(penalty='none',solver='lbfgs')
+        clf = logreg(penalty=None,solver='lbfgs')
     clf.fit(X,y)
     ypred = clf.predict(X)
     fpr, tpr, thresholds = metrics.roc_curve(y,ypred)
