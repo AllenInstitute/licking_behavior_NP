@@ -54,8 +54,8 @@ if __name__ == "__main__":
             job_count += 1
             print('starting cluster job for {}, job count = {}'.format(behavior_session_id, job_count))
             job_title = 'bsid_{}_beh_v_{}'.format(behavior_session_id, args.version)
-            walltime = '4:00:00'
-            mem = '2gb'
+            walltime = '6:00:00'
+            mem = '4gb'
             job_id = Slurm.JOB_ARRAY_ID
             job_array_id = Slurm.JOB_ARRAY_MASTER_ID
             output = stdout_location+"/"+str(job_array_id)+"_"+str(job_id)+"_"+str(behavior_session_id)+".out"
