@@ -43,6 +43,19 @@ The key output dataframes are:
 > import licking_behavior_NP.psy_output_tools as po  
 > licks_df = po.get_licks_table(BEHAVIOR_VERSION)  
 
+The columns of licks_df are:  
+- timestamps  (float) time of lick  
+- pre_ili (float) time from last lick  
+- post_ili (float) time until next lick  
+- bout_start (bool) whether this lick was the start of a licking bout  
+- bout_end (bool) whether this lick was the end of a licking bout  
+- bout_number (bool) oridinal numbering of bouts in this session  
+- rewarded (bool) whether this lick was rewarded  
+- num_rewards (int) number of rewards resulting from this lick. Can be > 1 from auto-rewards getting assigned to nearest lick  
+- bout_rewarded (bool) whether this licking bout was rewarded  
+- bout_num_rewards (int) number of rewards resulting from this lick bout. Can be > 1 from auto-rewards getting assigned to nearest lick  
+- behavior_session_id (int64)   
+
 ### bouts_df
 > import licking_behavior_NP.psy_output_tools as po  
 > licks_df = po.get_licks_table(BEHAVIOR_VERSION)  
