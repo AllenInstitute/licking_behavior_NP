@@ -86,7 +86,6 @@ def make_figure_1_timing_regressor():
     pv.plot_chronometric(bouts_df,BEHAVIOR_VERSION,savefig=True)
 
 def make_figure_1_timing_end_of_lick_bout():
-    raise Exception('need to compute bout table')
     licks_df = po.get_licks_table(BEHAVIOR_VERSION)
     bouts_df = po.build_bout_table(licks_df)
     pv.plot_interlick_interval(bouts_df,key='pre_ibi',version=BEHAVIOR_VERSION,
@@ -110,7 +109,6 @@ def make_figure_1_supplement_task():
 
 
 def make_figure_1_supplement_licking():
-    raise Exception('need to compute licks table')
     licks_df = po.get_licks_table(BEHAVIOR_VERSION)
     bouts_df = po.build_bout_table(licks_df)
     summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)
@@ -208,10 +206,10 @@ def make_figure_2_supplement_pca():
 
 def make_figure_2_novelty():
     summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)  
-    pv.scatter_df_by_experience(summary_df, ['Familiar','Novel 1'],
+    pv.scatter_df_by_experience(summary_df, ['Familiar','Novel'],
         'strategy_dropout_index',experience_type='experience_level',
         version=BEHAVIOR_VERSION,savefig=True, filetype=FIGTYPE) 
-    pv.histogram_df_by_experience(summary_df,['Familiar','Novel 1'],
+    pv.histogram_df_by_experience(summary_df,['Familiar','Novel'],
         'strategy_dropout_index',experience_type='experience_level',
         version=BEHAVIOR_VERSION,savefig=True,filetype=FIGTYPE)
     pv.plot_pivoted_df_by_experience(summary_df,'strategy_dropout_index',

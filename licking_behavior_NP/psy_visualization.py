@@ -1110,7 +1110,7 @@ def plot_df_groupby(summary_df, key, groupby, savefig=False, version=None,
 
 def histogram_df_by_experience(summary_df, stages, key, nbins=12,density=False,
     experience_type='experience_level',version=None, savefig=False, group=None, 
-    strict_experience=True,filetype='.svg',xlims=None):
+    strict_experience=False,filetype='.svg',xlims=None):
 
     if strict_experience:
         print('Limiting to strict experience')
@@ -1163,7 +1163,7 @@ def histogram_df_by_experience(summary_df, stages, key, nbins=12,density=False,
 
 def scatter_df_by_experience(summary_df,stages, key,
     experience_type='experience_level', version=None,savefig=False,group=None,
-    strict_experience=True,filetype='.svg'):
+    strict_experience=False,filetype='.svg'):
     ''' 
         Scatter session level metric <key> for two sessions matched from the same mouse.
         Sessions are matched by <stages> of <experience_type>
@@ -1711,7 +1711,7 @@ def pivot_df_by_experience(summary_df,key='strategy_dropout_index',
 
 def plot_pivoted_df_by_experience(summary_df, key,version,flip_index=False,
     experience_type='experience_level', mean_subtract=True,savefig=False,group=None,
-    strict_experience=True,full_mouse=True,filetype='.svg'):
+    strict_experience=False,full_mouse=True,filetype='.svg'):
     '''
         Plots the average value of <key> across experience levels relative to the average
         value of <key> for each mouse 
@@ -1753,14 +1753,14 @@ def plot_pivoted_df_by_experience(summary_df, key,version,flip_index=False,
         stats = test_significance_by_experience(x_pivot,[3,4],[1,2],ax,ylim,r)
 
     elif experience_type=='experience_level':
-        stats = test_significance_by_experience(x_pivot,['Familiar','Novel 1'],
+        stats = test_significance_by_experience(x_pivot,['Familiar','Novel'],
             [0,1],ax,ylim,r)
-        stats = test_significance_by_experience(x_pivot,['Novel 1','Novel >1'],
-            [1,2],ax,ylim,r)
+        #stats = test_significance_by_experience(x_pivot,['Novel 1','Novel >1'],
+        #    [1,2],ax,ylim,r)
         ylim = plt.ylim()[1]
         r = plt.ylim()[1] - plt.ylim()[0]
-        stats = test_significance_by_experience(x_pivot,['Familiar','Novel >1'],
-            [0,2],ax,ylim,r)
+        #stats = test_significance_by_experience(x_pivot,['Familiar','Novel >1'],
+        #    [0,2],ax,ylim,r)
 
     # Clean up Figure
     label = pgt.get_clean_string([key])[0]
