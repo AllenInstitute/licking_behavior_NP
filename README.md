@@ -49,19 +49,15 @@ The key output dataframes are:
 > bouts_df = po.build_bout_table(licks_df)  
 
 The columns of bouts_df are:   
-&nbspbehavior_session_id (int)  
-&nbspbout_number (int) &nbsp &nbsp ordinal count within each session  
-&nbspbout_length (int) &nbsp &nbsp number of licks in bout  
-&nbspbout_duration (float)       duration of bout in seconds  
-    bout_rewarded (bool)        whether this bout was rewarded  
-    pre_ibi (float)             time from the end of the last bout to   
-                                the start of this bout  
-    post_ibi (float)            time until the start of the next bout  
-                                from the end of this bout  
-    pre_ibi_from_start (float)  time from the start of the last bout  
-                                to the start of this bout  
-    post_ibi_from_start (float) time from the start of this bout  
-                                to the start of the next  
+- behavior_session_id (int)  
+- bout_number (int)           ordinal count within each session  
+- bout_length (int)           number of licks in bout  
+- bout_duration (float)       duration of bout in seconds  
+- bout_rewarded (bool)        whether this bout was rewarded  
+- pre_ibi (float)             time from the end of the last bout to the start of this bout  
+- post_ibi (float)            time until the start of the next bout from the end of this bout  
+- pre_ibi_from_start (float)  time from the start of the last bout to the start of this bout  
+- post_ibi_from_start (float) time from the start of this bout to the start of the next  
 
 ### figure script
 > import licking_behavior_NP.figure_script as f  
