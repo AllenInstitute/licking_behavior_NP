@@ -48,12 +48,16 @@ def get_directory(version,verbose=False,subdirectory=None,group=None):
     directory = root_directory+'psy_fits_v'+str(version)+'/'+subdir
     return directory
 
+def get_cache():
+    cache_dir = '/allen/programs/mindscope/workgroups/np-behavior/vbn_data_release/vbn_s3_cache/'
+    cache = VisualBehaviorNeuropixelsProjectCache.from_s3_cache(cache_dir=Path(cache_dir))
+    return cache
+
 def get_np_manifest():
     '''
         Returns a dataframe of the NP sessions
     '''
-    cache_dir = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/data/'
-    cache = VisualBehaviorNeuropixelsProjectCache.from_s3_cache(cache_dir=Path(cache_dir))
+    cache = get_cache()
     np_table = cache.get_ecephys_session_table(filter_abnormalities=False)
     np_table = np_table.sort_index()
     return np_table
@@ -73,9 +77,7 @@ def get_data(bsid):
 
     # Get SDK session object
     print('Loading SDK object')
-    cache_dir = '/allen/programs/braintv/workgroups/nc-ophys/alex.piet/NP/data/'
-    #cache_dir = '/allen/programs/mindscope/workgroups/np-behavior/vbn_data_release/vbn_s3_cache/'
-    cache = VisualBehaviorNeuropixelsProjectCache.from_s3_cache(cache_dir=Path(cache_dir))
+    cache = get_cache()
     session = cache.get_behavior_session(behavior_session_id=bsid)
 
     # Remove Passive session:
