@@ -88,7 +88,7 @@ Finally, there are columns that are lists of length 4800 that correspond to each
 - weight_omissions1 (float) the weight of the post omission strategy  
 - weight_task0 (float) the weight of the visual strategy  
 - weight_timing1D (float) the weight of the timing strategy  
-- lick_bout_rate (float) the rate of licking bouts (units?)  
+- lick_bout_rate (float) the rate of licking bouts (units=licking bouts / second)  
 - hit (float) was it a hit? Nan=image repeat, 1=hit, 0=miss  
 - RT (float) reaction time from stimulus onset. Nan=no licking bout start
 - image_name (str) stimulus name  
@@ -99,9 +99,9 @@ Finally, there are columns that are lists of length 4800 that correspond to each
 - is_change (bool) was the stimulus and image change  
 - lick_bout_start (bool) did a lick bout start on this image  
 - miss (float) nan=image repeat, 0=hit, 1=miss  
-- reward_rate (float) reward rate (units?)  
+- reward_rate (float) reward rate (units=rewards/second)  
 - strategy_weight_index_by_image (float) different in weight of visual and timing strategies  
-- lick_hit_fraction_rate (float) the rolling percentage of licking bouts that resulted in a reward (units?)  
+- lick_hit_fraction_rate (float) the rolling percentage of licking bouts that resulted in a reward (units=%)  
 
 
 ### change_df
