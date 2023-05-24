@@ -86,7 +86,7 @@ def make_figure_1_timing_regressor():
     pv.plot_chronometric(bouts_df,BEHAVIOR_VERSION,savefig=True)
 
 def make_figure_1_timing_end_of_lick_bout():
-    raise Exception('need to compute licks table')
+    raise Exception('need to compute bout table')
     licks_df = po.get_licks_table(BEHAVIOR_VERSION)
     bouts_df = po.build_bout_table(licks_df)
     pv.plot_interlick_interval(bouts_df,key='pre_ibi',version=BEHAVIOR_VERSION,
@@ -97,7 +97,6 @@ def make_figure_1_timing_end_of_lick_bout():
 
 
 def make_figure_1_supplement_task():
-    raise Exception('need to compute change table')
     change_df = po.get_change_table(BEHAVIOR_VERSION)
     summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)
 
@@ -231,16 +230,16 @@ def make_figure_3():
         savefig=True, version=BEHAVIOR_VERSION)
     pv.plot_engagement_landscape_by_strategy(summary_df, z='weight_timing1D',
         savefig=True, version=BEHAVIOR_VERSION)
-    pv.plot_session_summary_trajectory(summary_df,'engagement',
+    pv.plot_session_summary_trajectory(summary_df,'engaged',
         version=BEHAVIOR_VERSION, categories='visual_strategy_session',
         savefig=True, filetype=FIGTYPE, ylim=[0,100],axline=False,xaxis_images=False, 
         ylabel_extra='fraction ',paper_fig=True)
     pv.RT_by_engagement(summary_df,BEHAVIOR_VERSION,savefig=True, filetype=FIGTYPE,
-        key='engagement')
+        key='engaged')
     pv.RT_by_group(summary_df,BEHAVIOR_VERSION,engaged='engaged',ylim=.004,
-        savefig=True, filetype=FIGTYPE,key='engagement',width=5)
+        savefig=True, filetype=FIGTYPE,key='engaged',width=5)
     pv.RT_by_group(summary_df,BEHAVIOR_VERSION,engaged='disengaged',ylim=.004,
-        savefig=True, filetype=FIGTYPE,key='engagement',width=5)
+        savefig=True, filetype=FIGTYPE,key='engaged',width=5)
 
 def make_figure_3_example():
     raise Exception('Need to pick an example bsid')
