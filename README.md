@@ -80,6 +80,28 @@ The columns of summary_df are:
 - strategy_weight_index (float) the difference in average strategy weights between visual and timing strategies  
 - fraction_engaged (float) the percentage of the session when the mouse was engaged
 
+Additionally, there are columns that are split by whether the mouse was engaged or disengaged. These should be self-explanatory based on the corresponding column that isn't split by engagement. 
+
+Finally, there are columns that are lists of length 4800 that correspond to each image presented during the active behavior period:  
+- weight_bias (float) the weight of the licking bias strategy  
+- weight_omissions (float) the weight of the omission strategy  
+- weight_omissions1 (float) the weight of the post omission strategy  
+- weight_task0 (float) the weight of the visual strategy  
+- weight_timing1D (float) the weight of the timing strategy  
+- lick_bout_rate (float) the rate of licking bouts (units?)  
+- hit (float) was it a hit? Nan=image repeat, 1=hit, 0=miss  
+- RT (float) reaction time from stimulus onset. Nan=no licking bout start
+- image_name (str) stimulus name  
+- image_correct_reject (float) 0=licked, 1=did not lick, nan=in licking bout, or image change
+- image_false_alarm (floaT), 1=licked, 0=did not lick, nan=image change
+- engaged (bool) Was the animal engaged?  
+- omitted (bool) was the stimulus omitted  
+- is_change (bool) was the stimulus and image change  
+- lick_bout_start (bool) did a lick bout start on this image  
+- miss (float) nan=image repeat, 0=hit, 1=miss  
+- reward_rate (float) reward rate (units?)  
+- strategy_weight_index_by_image (float) different in weight of visual and timing strategies  
+- lick_hit_fraction_rate (float) the rolling percentage of licking bouts that resulted in a reward (units?)  
 
 
 ### change_df
