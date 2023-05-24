@@ -37,32 +37,50 @@ The key output dataframes are:
 > import licking_behavior_NP.psy_output_tools as po  
 > summary_df = po.get_np_summary_table(BEHAVIOR_VERSION)  
 
-The columns of summary_df are:  
-- licked              (bool)  Did the mouse lick during this image?  
-- lick_bout_start     (bool)  did the mouse start a lick bout during this image?  
-- bout_number         (int)   oridinal count of licking bouts, only defined at the start of licking bouts  
-- lick_bout_end       (bool)  did a lick bout end during this image?  
-- in_lick_bout        (bool)   Whether this was an image removed for fitting because the animal was in a licking bout  
-- num_licks           (int)   Number of licks during this image   
-- lick_rate           (float) licks/second   
-- rewarded            (bool)  Whether this image was rewarded  
-- reward_rate         (float) rewards/second  
-- lick_bout_rate      (float) lick-bouts/second  
-- lick_hit_fraction   (float) % Percentage of lick bouts that were rewarded   
-- hit_rate            (float) % Percentage of changes with rewards  
-- miss_rate           (float) % Percentage of changes without rewards  
-- false_alarm_rate    (float) % Percentage of non-changes with licks  
-- correct_reject_rate (float) % Percentage of non-changes without licks  
-- d_prime             (float)  
-- criterion           (float)  
-- RT                  (float) Response time from image onset in s  
-- engaged             (boolean)  
-- strategy weights            model weight for this image  
--     bias            (float)  
--     omissions       (float)  
--     omissions1      (float)  
--     task0           (float)  
--     timing1D        (float)   
+The columns of summary_df are: 
+- session_roc (float) The cross validated area under the ROC curve for this session  
+- strategy_dropout_index (float) The strategy index for this session  
+- visual_strategy_session (bool) Whether the visual strategy was dominant in this session  
+- strategy_labels (str) Either 'visual' or 'timing'
+- prior_bias (float) the smoothing prior for the licking bias strategy  
+- prior_omissions (float) the smoothing prior for the licking omissions strategy  
+- prior_omissions1 (float) the smoothing prior for the post omissions strategy  
+- prior_task0 (float) the smoothing prior for the visual strategy  
+- prior_timing1D (float) the smoothing prior for the timing strategy  
+- dropout_bias (float) the dropout index for the licking bias strategy  
+- dropout_omissions (float) the dropout index for the licking omissions strategy  
+- dropout_omissions1 (float) the dropout index for the post omissions strategy  
+- dropout_task0 (float) the dropout index for the visual strategy  
+- dropout_timing1D (float) the dropout index for the timing strategy  
+- dropout_cv_bias (float) the cross validated dropout index for the licking bias strategy  
+- dropout_cv_omissions (float) the cross validated dropout index for the licking omissions strategy  
+- dropout_cv_omissions1 (float) the cross validated dropout index for the post omissions strategy  
+- dropout_cv_task0 (float) the cross validated dropout index for the visual strategy  
+- dropout_cv_timing1D (float) the cross validated dropout index for the timing strategy  
+- avg_weight_bias (float) the average weight for the licking bias strategy  
+- avg_weight_omissions (float) the average weight for the licking omissions strategy  
+- avg_weight_omissions1 (float) the average weight for the post omissions strategy  
+- avg_weight_task0 (float) the average weight for the visual strategy  
+- avg_weight_timing1D (float) the average weight for the timing strategy  
+- num_hits (float) number of hits in this session  
+- num_miss (float) number of misses in this session  
+- num_omission_licks (float) number of licking bouts that started during an omission  
+- num_post_omission_licks (float) number of licking bouts that started on the image after an omission  
+- num_late_task_licks (float) number of licking bouts that started on the image after an image change
+- num_changes (float) number of image changes  
+- num_omissions (float) number of omissions  
+- num_image_false_alarm (float) number of licking bouts that started on a non-change image
+- num_image_correct_reject (float) number of non-change images that did not contain the start of a licking bout  
+- num_lick_bouts (float) number of licking bouts
+- lick_fraction (float) the percentage of images with the start of a licking bout
+- omission_lick_fraction (float) the percentage of omissions with the start of a licking bout
+- post_omission_lick_fraction (float) the percentage of post-omission images with the start of a licking bout 
+- lick_hit_fraction (float) the percentage of licking bouts that resulted in a reward  
+- trial_hit_fraction (float) the percentage of image changes that were rewarded  
+- strategy_weight_index (float) the difference in average strategy weights between visual and timing strategies  
+- fraction_engaged (float) the percentage of the session when the mouse was engaged
+
+
 
 ### change_df
 > import licking_behavior_NP.psy_output_tools as po  
