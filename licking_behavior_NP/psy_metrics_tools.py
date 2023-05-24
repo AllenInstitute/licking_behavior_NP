@@ -102,7 +102,7 @@ def annotate_licks(session):
     session.licks['rewarded'] = False # Setting default to False
     session.licks['num_rewards'] = 0 
     for index, row in session.rewards.iterrows():
-        if False:#row.autorewarded:
+        if row.auto_rewarded:
             # Assign to nearest lick
             mylick = np.abs(session.licks.timestamps - row.timestamps).idxmin()
         else:
