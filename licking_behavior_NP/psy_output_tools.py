@@ -510,6 +510,8 @@ def build_licks_table(summary_df, version):
             crash +=1
             crashed.append(row.behavior_session_id)
         else:
+            df.at[0,'pre_ili'] = np.nan
+            df.at[len(df)-1,'post_ili'] = np.nan
             df.reset_index(drop=True)
             df = df.drop(columns=['frame'])
             df['behavior_session_id'] = row.behavior_session_id
