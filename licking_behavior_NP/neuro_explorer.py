@@ -35,8 +35,8 @@ def plot(response_type):
 
 def plot_by_areas(visual_hit_responses, timing_hit_responses):
     fig, ax = plt.subplots()
-    areas_of_interest = ['LGd', 'VISp', 'VISl']#, 'VISrl', 'LP', 'VISal', 'VISpm', \
-    #    'VISam', 'MRN', 'CA3']
+    areas_of_interest = ['LGd', 'VISp', 'VISl', 'VISrl', 'LP', 'VISal', 'VISpm', \
+        'VISam', 'MRN', 'CA3']
     colors = ['pink','purple','blue','lightblue','green','yellow','orange','red','black','cyan']
     for index, area in enumerate(areas_of_interest):
         responses = np.concatenate(visual_hit_responses[area])
