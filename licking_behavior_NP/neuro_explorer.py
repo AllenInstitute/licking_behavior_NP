@@ -33,20 +33,20 @@ def plot(response_type):
     ax.set_xlim([0, 100])
     ax.set_ylim([-0.002, 0.015])   
 
-def plot_by_areas(visual_hit_responses, timing_hit_responses):
+def plot_by_areas(visual_hit_responses, timing_hit_responses,areas_of_interest=['VISp']):
     fig, ax = plt.subplots()
-    areas_of_interest = ['LGd', 'VISp', 'VISl', 'VISrl', 'LP', 'VISal', 'VISpm', \
-        'VISam', 'MRN', 'CA3']
+    #areas_of_interest = ['LGd', 'VISp', 'VISl', 'VISrl', 'LP', 'VISal', 'VISpm', \
+    #    'VISam', 'MRN', 'CA3']
     colors = ['pink','purple','blue','lightblue','green','yellow','orange','red','black','cyan']
     for index, area in enumerate(areas_of_interest):
         responses = np.concatenate(visual_hit_responses[area])
-        responses = [baseline_subtract(r) for r in responses]
+        #responses = [baseline_subtract(r) for r in responses]
         responses = [exponential_convolve(r, 3, True) for r in responses]
         mean_response = np.nanmean(responses, axis=0)
         ax.plot(mean_response,'-',color=colors[index]) 
   
         responses = np.concatenate(timing_hit_responses[area])
-        responses = [baseline_subtract(r) for r in responses]
+        #responses = [baseline_subtract(r) for r in responses]
         responses = [exponential_convolve(r, 3, True) for r in responses]
         mean_response = np.nanmean(responses, axis=0)
         ax.plot(mean_response,'--',color=colors[index])   
@@ -75,7 +75,7 @@ def f():
         'VISam', 'LP', 'MRN', 'CA3']
 
     # get strategy information
-    summary_df = po.get_np_summary_table(100)
+    summary_df = po.get_np_summary_table(100).query('experience_level == "Familiar"')
     visual_hit_responses = {area:[] for area in areas_of_interest}
     timing_hit_responses = {area:[] for area in areas_of_interest}   
     visual_ids = summary_df.query('visual_strategy_session').index.values
@@ -87,7 +87,7 @@ def f():
         session_tensor = active_tensor[str(session_id)]
         session_units = get_tensor_unit_table(units, session_tensor['unitIds'][()])
         hit_flashes = session_stim_table[(session_stim_table['is_change'])&\
-            (session_stim_table['hit'])]
+            (session_stim_table['miss'])]
         good_unit_indices = session_units[session_units['unit_id'].isin(good_unit_ids)].index.values
         
         for area_of_interest in areas_of_interest:
