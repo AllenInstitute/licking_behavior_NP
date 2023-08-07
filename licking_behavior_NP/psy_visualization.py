@@ -457,6 +457,7 @@ def plot_session_summary_weight_avg_scatter_task0(summary_df, version=None,
         color=style['regression_color'], 
         linestyle=style['regression_linestyle'])
     score = round(model.score(x,y),2)
+    print(score)
     ax.set_aspect('equal')
     ax.set_xlim(0,6.5)
     ax.set_ylim(-.5,4)
