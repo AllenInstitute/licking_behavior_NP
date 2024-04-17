@@ -89,7 +89,7 @@ def get_data(bsid):
     # Remove receptive field columns
     drop_cols = ['color','contrast','orientation','position_x','position_y',\
         'spatial_frequency','temporal_frequency']
-    session.stimulus_presentations_np.drop(columns=drop_cols,inplace=True)
+    session.stimulus_presentations_np.drop(columns=drop_cols,inplace=True, errors='ignore')
 
     print('Adding stimulus annotations')
     # Get extended stimulus presentations
