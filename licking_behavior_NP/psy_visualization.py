@@ -3677,7 +3677,3 @@ def view_strategy_labels(summary_df):
     scatter_df(summary_df, 'dropout_task0','dropout_timing1D',
         categories='strategy_labels_with_mixed',flip1=True, flip2=True)   
 
-
-
-
-

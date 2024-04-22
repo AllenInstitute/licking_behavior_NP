@@ -642,3 +642,19 @@ def build_comparison_df(df1,df2, version1,version2):
     return merged_df
 
 
+def add_novel_image_labels(summary_df):
+    novel_image_labels = []
+    G = np.sort(['im036_r','im012_r','im115_r','im083_r','im111_r','im078_r','im044_r','im047_r'])
+    H = np.sort(['im083_r','im111_r','im104_r','im114_r','im024_r','im034_r','im087_r','im005_r']) 
+    familiar_images = set(G).intersection(H) 
+    for index, row in summary_df.iterrows():
+        labels = np.copy(row.image_name)
+        if row.experience_level == 'Familiar':
+            labels = ['F' for x in labels]
+        else:
+            labels = ['F' if x in familiar_images else 'N' for x in labels]
+        novel_image_labels.append(labels)
+        
+    summary_df['novel_image'] = novel_image_labels
+    return summary_df 
+
