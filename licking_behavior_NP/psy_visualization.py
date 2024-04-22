@@ -3677,7 +3677,39 @@ def view_strategy_labels(summary_df):
     scatter_df(summary_df, 'dropout_task0','dropout_timing1D',
         categories='strategy_labels_with_mixed',flip1=True, flip2=True)   
 
+def plot_hit_fraction_by_novel_image(summary_df,version=None,savefig=False):
 
+    familiar = summary_df.query('experience_level == "Familiar"')['familiar_hit_fraction'].values
+    novel_novel = summary_df.query('experience_level == "Novel"')['novel_hit_fraction'].values
+    novel_familiar = summary_df.query('experience_level == "Novel"')['familiar_hit_fraction'].values
+    plt.figure()
+    noise = 0.05
+    x = noise*2
 
+    plt.plot(0+np.random.randn(len(familiar))*noise,familiar,'bo',alpha=.5)
+    plt.plot(1+np.random.randn(len(familiar))*noise,novel_novel,'ro',alpha=.5)
+    plt.plot(2+np.random.randn(len(familiar))*noise,novel_familiar,'ro',alpha=.5)
+
+    plt.plot([0-x,0+x],[np.mean(familiar),np.mean(familiar)],'k-',linewidth=4)
+    plt.plot([1-x,1+x],[np.mean(novel_novel),np.mean(novel_novel)],'k-',linewidth=4)
+    plt.plot([2-x,2+x],[np.mean(novel_familiar), np.mean(novel_familiar)],'k-',linewidth=4)
+
+    plt.xlim(-.5,2.5)
+    ax = plt.gca()
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.set_ylabel('hit fraction',fontsize=16)
+    ax.set_xlabel('session / stimulus type',fontsize=16)
+    ax.tick_params(axis='both',labelsize=12)
+    ax.set_xticks([0,1,2])
+    ax.set_xticklabels(['F/F', 'N/N','N/F'] ,fontsize=16)
+
+    plt.tight_layout()
+    
+    if savefig:
+        directory = pgt.get_directory(version, subdirectory ='figures')
+        filename = directory +"hit_fraction_by_novel_image.png"
+        print('Figure saved to: '+filename)
+        plt.savefig(filename)         
 
 
