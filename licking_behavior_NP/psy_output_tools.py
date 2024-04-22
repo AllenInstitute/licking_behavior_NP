@@ -658,3 +658,24 @@ def add_novel_image_labels(summary_df):
     summary_df['novel_image'] = novel_image_labels
     return summary_df 
 
+def add_hit_fraction_by_novel_image(summary_df):
+    novel_hit_fraction = []
+    familiar_hit_fraction = []
+    for index, row in summary_df.iterrows():
+        x = pd.DataFrame({
+            'is_change':row.is_change,
+            'novel_image':row.novel_image,
+            'hit':row.hit
+            })
+        familiar_hit_fraction.append(x.query('(novel_image == "F") and (is_change ==1)')['hit'].mean())
+        novel_hit_fraction.append(x.query('(novel_image == "N") and (is_change ==1)')['hit'].mean())
+    summary_df['familiar_hit_fraction'] = familiar_hit_fraction
+    summary_df['novel_hit_fraction'] = novel_hit_fraction
+    return summary_df
+
+
+
+
+
+
+
