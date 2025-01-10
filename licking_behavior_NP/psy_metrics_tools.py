@@ -364,7 +364,7 @@ def annotate_image_rolling_metrics(session,win_dur=640, win_type='gaussian',win_
     reward_threshold = pgt.get_engagement_threshold()
     lick_bout_threshold = pgt.get_engagement_lick_threshold()
     session.stimulus_presentations_np['engaged'] = \
-        [(x[0] > reward_threshold) and (x[1] > lick_bout_threshold) for x in \
+        [(x[0] > reward_threshold) or (x[1] > lick_bout_threshold) for x in \
             zip(session.stimulus_presentations_np['reward_rate'],\
             session.stimulus_presentations_np['bout_rate'])]
 
