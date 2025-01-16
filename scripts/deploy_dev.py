@@ -2,7 +2,7 @@ import os
 import time
 import argparse
 from simple_slurm import Slurm
-import psy_general_tools as pgt
+import licking_behavior_NP.psy_general_tools as pgt
 
 # Parse optional arguments
 parser = argparse.ArgumentParser(description='deploy behavior fits to cluster')
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     print('stdout files will be at {}'.format(stdout_location))
     
     # Get list of behavior_session_ids
-    manifest = pgt.get_ophys_manifest()
+    manifest = pgt.get_np_manifest()
     behavior_session_ids = manifest.behavior_session_id.values
     print('behavior_session_ids loaded')
 
@@ -70,4 +70,4 @@ if __name__ == "__main__":
                 args_string,
             )
         )
-        time.sleep(0.001)
+        time.sleep(0.1)

@@ -170,14 +170,23 @@ def build_session_strategy_df(bsid, version,TRAIN=False,fit=None,session=None):
     # Load Model fit
     if fit is None:
         fit = load_fit(bsid, version=version)
- 
+
+    if len(fit['wMode'][0,:]) != np.sum(~session.stimulus_presentations_np['in_lick_bout']):
+        assert (fit['psydata']['full_df']['in_lick_bout'].values[1:] == session.stimulus_presentations_np['in_lick_bout'].values).all(), "off by one adjustment failed"
     # include model weights
     weights = get_weights_list(fit['weights'])
     for wdex, weight in enumerate(weights):
-        # Weights are not defined during lick bouts
-        session.stimulus_presentations_np.at[\
-            ~session.stimulus_presentations_np['in_lick_bout'], weight] = \
-            fit['wMode'][wdex,:]
+        if len(fit['wMode'][0,:]) != np.sum(~session.stimulus_presentations_np['in_lick_bout']):
+             
+            # Weights are not defined during lick bouts
+            session.stimulus_presentations_np.at[\
+                ~session.stimulus_presentations_np['in_lick_bout'], weight] = \
+                fit['wMode'][wdex,1:]           
+        else:
+            # Weights are not defined during lick bouts
+            session.stimulus_presentations_np.at[\
+                ~session.stimulus_presentations_np['in_lick_bout'], weight] = \
+                fit['wMode'][wdex,:]
 
         # Fill in lick bouts with the value from the start of the bout
         session.stimulus_presentations_np[weight] = \
